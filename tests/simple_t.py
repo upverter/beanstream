@@ -167,7 +167,7 @@ class BeanstreamTests(unittest.TestCase):
         resp = txn.commit()
         assert not resp.approved()
 
-    def test_payment_profile_with_recurring_billing(self):
+    def test_payment_profile_from_recurring_billing(self):
         today = date.today()
         visa = self.approved_cards['visa']
         card = billing.CreditCard(
@@ -182,7 +182,7 @@ class BeanstreamTests(unittest.TestCase):
 
         customer_code = resp.customer_code()
 
-        txn = self.beanstream.create_recurring_billing_account_with_payment_profile(25, customer_code, 'w', 4)
+        txn = self.beanstream.create_recurring_billing_account_from_payment_profile(25, customer_code, 'w', 4)
         resp = txn.commit()
         assert resp.approved()
         assert resp.account_id() is not None

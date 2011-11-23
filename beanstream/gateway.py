@@ -62,7 +62,7 @@ class Beanstream(object):
             raise errors.ConfigurationException('hash algorithm must be one of MD5 or SHA1')
 
     def purchase(self, amount, card, billing_address=None):
-        """ Performs a one-off credit card purchase.
+        """ Returns a Purchase object with the specified options.
         """
         txn = transaction.Purchase(self, amount)
         txn.set_card(card)
@@ -72,32 +72,25 @@ class Beanstream(object):
         return txn
 
     def void_purchase(self):
-        """ Voids a purchase.
-        """
         raise NotImplementedError
 
     def return_purchase(self):
-        pass
+        raise NotImplementedError
 
     def void_return(self):
-        """ Voids a return.
-        """
-        pass
+        raise NotImplementedError
 
     def preauth(self):
-        """ Performs a pre-authorizataion.
-        """
-        pass
+        raise NotImplementedError
 
     def cancel_preauth(self):
-        pass
+        raise NotImplementedError
 
     def preauth_completion(self):
-        pass
-
+        raise NotImplementedError
 
     def create_payment_profile(self, card, billing_address=None):
-        """ Creates a payment profile with the specified information.
+        """ Returns a CreatePaymentProfile object with the specified options.
         """
         txn = payment_profiles.CreatePaymentProfile(self, card)
         if billing_address:
@@ -106,18 +99,23 @@ class Beanstream(object):
         return txn
 
     def modify_payment_profile(self, customer_code):
+        """ Returns a ModifyPaymentProfile object with the specified options.
+        """
         txn = payment_profiles.ModifyPaymentProfile(self, customer_code)
         return txn
 
     def purchase_with_payment_profile(self, amount, customer_code):
-        """ Performs a one-off credit card purchase against a payment profile.
+        """ Returns a Purchase object with the specified options.
         """
         txn = transaction.Purchase(self, amount)
         txn.set_customer_code(customer_code)
         return txn
 
-    def create_recurring_billing_account_with_payment_profile(self, amount,
+    def create_recurring_billing_account_from_payment_profile(self, amount,
             customer_code, frequency_period, frequency_increment):
+        """ Returns a CreateRecurringBillingAccount object with the specified
+        options.
+        """
         txn = recurring_billing.CreateRecurringBillingAccount(self, amount,
                 frequency_period, frequency_increment)
         txn.set_customer_code(customer_code)
@@ -125,6 +123,9 @@ class Beanstream(object):
 
     def create_recurring_billing_account(self, amount, card, frequency_period,
             frequency_increment, billing_address=None):
+        """ Returns a CreateRecurringBillingAccount object with the specified
+        options.
+        """
         txn = recurring_billing.CreateRecurringBillingAccount(self, amount,
                 frequency_period, frequency_increment)
         txn.set_card(card)
@@ -134,6 +135,9 @@ class Beanstream(object):
         return txn
 
     def modify_recurring_billing_account(self, account_id):
+        """ Returns a ModifyRecurringBillingAccount object with the specified
+        options.
+        """
         txn = recurring_billing.ModifyRecurringBillingAccount(self, account_id)
         return txn
 
