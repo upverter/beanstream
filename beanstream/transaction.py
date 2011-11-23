@@ -229,10 +229,87 @@ class CreateRecurringBillingAccount(Purchase):
     transaction with some options specifying recurring billing.
     """
 
-    def __init__(self, beanstream, amount, card, email, billing_address):
-        super(CreateRecurringBillingAccount, self).__init__(beanstream, amount, card, email, billing_address)
+    def __init__(self, beanstream, amount, card, email, frequency_period,
+            frequency_increment, end_month=False, delay_charge=False,
+            first_date=None, second_date=None, expiry=None, apply_tax1=False,
+            apply_tax2=False, billing_address=None, shipping_details=None,
+            product_details=None, language='ENG', refs=[], comments=None,
+            ip_address=None):
+        """ Create a new recurring billing account creation transaction.
+
+        Arguments:
+            beanstream: gateway object
+            amount: the amount to charge on a recurring basis
+            card: the CreditCard object to charge
+            email: the email address to which to send receipts
+            frequency_period: one of DWMY; used in combination with
+                frequency_increment to set billing frequency
+            frequency_increment: numeric; used in combination with
+                frequency_period to set billing frequency
+            end_month: True if the customer should be charged on the last day
+                of the month; frequency_period must be M (ignored otherwise)
+                (optional)
+            delay_charge: True to delay charging until the first billing date;
+                False to charge now (optional; default False)
+            first_date: a date object containing the first billing date
+                (optional)
+            second_date: a date object containing the second billing date
+                (optional)
+            expiry: a date object containing the expiry date of the account
+                (optional)
+            apply_tax1: True to apply GST or custom tax 1 (optional; default
+                False)
+            apply_tax2: True to apply PST or custom tax 2 (optional; default
+                False)
+            billing_address: the billing address associated with the card
+                (optional)
+            shipping_details: the shipping details associated with the order
+                (optional)
+            product_details: the product details associated with the order
+                (optional)
+            language: the preferred language of the email receipts (optional;
+                default ENG)
+            refs: a list custom order information, maximum length 5 (optional)
+            comments: comments associated with the order (optional)
+            ip_address: the IP address associated with the order (optional)
+        """
+
+        super(CreateRecurringBillingAccount, self).__init__(beanstream, amount,
+                card, email, billing_address=billing_address,
+                shipping_details=shipping_details,
+                product_details=product_details, language=language, refs=refs,
+                comments=comments, ip_address=ip_address)
+        self.response_class = CreateRecurringBillingAccountResponse
 
         self.params['trnRecurring'] = '1'
+
+        frequency_period = frequency_period.upper()
+        if frequency_period not in 'DWMY':
+            raise errors.ValidationException('invalid frequency period specified: %s (must be one of DWMY)' % frequency_period)
+        self.params['rbBillingPeriod'] = frequency_period
+
+        self.params['rbBillingIncrement'] = frequency_increment
+
+        if frequency_period == 'M':
+            self.params['rbEndMonth'] = '1' if end_month else '0'
+        self.params['rbCharge'] = '0' if delay_charge else '1'
+
+        if first_date:
+            self.params['rbFirstBilling'] = first_date.strftime('%m%d%Y')
+        if second_date:
+            self.params['rbSecondBilling'] = second_date.strftime('%m%d%Y')
+        if expiry:
+            self.params['rbExpiry'] = expiry.strftime('%m%d%Y')
+
+        self.params['rbApplyTax1'] = '1' if apply_tax1 else '0'
+        self.params['rbApplyTax2'] = '1' if apply_tax2 else '0'
+
+
+class CreateRecurringBillingAccountResponses(PurchaseResponse):
+
+    def account_id(self):
+        ''' The account id for the recurring billing account. '''
+        return self.resp.get('rbAccountId', [None])[0]
 
 
 class ModifyRecurringBillingAccount(Transaction):
