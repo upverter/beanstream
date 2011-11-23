@@ -54,12 +54,16 @@ class CreditCard:
 
 class Address:
 
-    def __init__(self, name, phone, address1, address2, city, province, postal_code, country):
+    def __init__(self, name, email, phone, address1, address2, city, province, postal_code, country):
         """ Initialize an address struct and perform some basic validation.
         """
         if not name:
             raise errors.ValidationException('Name must be specified in address')
         self.name = name
+
+        if not email:
+            raise errors.ValidationException('Email must be specified in address')
+        self.email = email
 
         if not phone:
             raise errors.ValidationException('Phone must be specified in address')
@@ -93,6 +97,7 @@ class Address:
     def params(self, key_prefix):
         return {
             '%sName' % key_prefix: self.name,
+            '%sEmailAddress' % key_prefix: self.email,
             '%sPhoneNumber' % key_prefix: self.phone,
             '%sAddress1' % key_prefix: self.address1,
             '%sAddress2' % key_prefix: self.address2,

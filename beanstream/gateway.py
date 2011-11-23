@@ -60,10 +60,10 @@ class Beanstream(object):
         if self.hash_algorithm not in ('MD5', 'SHA1'):
             raise errors.ConfigurationException('hash algorithm must be one of MD5 or SHA1')
 
-    def purchase(self, amount, card, email, billing_address=None):
+    def purchase(self, amount, card, billing_address=None):
         """ Performs a one-off credit card purchase.
         """
-        txn = transaction.Purchase(self, amount, card, email)
+        txn = transaction.Purchase(self, amount, card)
         if billing_address:
             txn.add_billing_address(billing_address)
 
@@ -106,17 +106,17 @@ class Beanstream(object):
     def modify_payment_profile(self):
         pass
 
-    def purchase_with_payment_profile(self, amount, card, email, customer_code):
+    def purchase_with_payment_profile(self, amount, card, customer_code):
         """ Performs a one-off credit card purchase against a payment profile.
         """
-        txn = transaction.Purchase(self, amount, card, email)
+        txn = transaction.Purchase(self, amount, card)
         txn.add_customer_code(customer_code)
         return txn
 
-    def create_recurring_billing_account(self, amount, card, email,
-            frequency_period, frequency_increment, billing_address=None):
+    def create_recurring_billing_account(self, amount, card, frequency_period,
+            frequency_increment, billing_address=None):
         txn = recurring_billing.CreateRecurringBillingAccount(self, amount, card,
-                email, frequency_period, frequency_increment)
+                frequency_period, frequency_increment)
         if billing_address:
             txn.add_billing_address(billing_address)
 

@@ -57,6 +57,7 @@ class BeanstreamTests(unittest.TestCase):
 
         self.billing_address = billing.Address(
             'John Doe',
+            'john.doe@example.com',
             '555-555-5555',
             '123 Fake Street',
             '',
@@ -77,7 +78,7 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             visa['cvd'])
 
-        txn = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        txn = self.beanstream.purchase(50, card, self.billing_address)
         resp = txn.commit()
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
@@ -91,7 +92,7 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             '000')
 
-        txn = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        txn = self.beanstream.purchase(50, card, self.billing_address)
         resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Mismatch'
@@ -106,7 +107,7 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             visa_limit['cvd'])
 
-        txn = self.beanstream.purchase(250, card, 'john.doe@example.com', self.billing_address)
+        txn = self.beanstream.purchase(250, card, self.billing_address)
         resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Match'
@@ -120,12 +121,11 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             visa['cvd'])
 
-        txn = self.beanstream.create_recurring_billing_account(50, card, 'john.doe@example.com', 'w', 2, billing_address=self.billing_address)
+        txn = self.beanstream.create_recurring_billing_account(50, card, 'w', 2, billing_address=self.billing_address)
         resp = txn.commit()
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
         assert resp.account_id() is not None
-        assert False
 
     def test_payment_profiles(self):
         today = date.today()
@@ -139,5 +139,4 @@ class BeanstreamTests(unittest.TestCase):
         txn = self.beanstream.create_payment_profile(card, billing_address=self.billing_address)
         resp = txn.commit()
         assert resp.approved()
-        assert False
 

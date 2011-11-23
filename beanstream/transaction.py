@@ -127,14 +127,13 @@ class Response(object):
 
 class Purchase(Transaction):
 
-    def __init__(self, beanstream_gateway, amount, card, email):
+    def __init__(self, beanstream_gateway, amount, card):
         super(Purchase, self).__init__(beanstream_gateway)
         self.url = self.URLS['process_transaction']
         self.response_class = PurchaseResponse
 
         self.params['merchant_id'] = self.beanstream.merchant_id
         self.params['trnAmount'] = self._process_amount(amount)
-        self.params['ordEmailAddress'] = email
         self.params['requestType'] = 'BACKEND'
         self.params['trnType'] = Transaction.TRN_TYPES['purchase']
 

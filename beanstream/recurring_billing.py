@@ -10,7 +10,7 @@ class CreateRecurringBillingAccount(transaction.Purchase):
     transaction with some options specifying recurring billing.
     """
 
-    def __init__(self, beanstream, amount, card, email, frequency_period,
+    def __init__(self, beanstream, amount, card, frequency_period,
             frequency_increment):
         """ Create a new recurring billing account creation transaction.
 
@@ -18,7 +18,6 @@ class CreateRecurringBillingAccount(transaction.Purchase):
             beanstream: gateway object
             amount: the amount to charge on a recurring basis
             card: the CreditCard object to charge
-            email: the email address to which to send receipts
             frequency_period: one of DWMY; used in combination with
                 frequency_increment to set billing frequency
             frequency_increment: numeric; used in combination with
@@ -26,7 +25,7 @@ class CreateRecurringBillingAccount(transaction.Purchase):
         """
 
         super(CreateRecurringBillingAccount, self).__init__(beanstream, amount,
-                card, email)
+                card)
         self.response_class = CreateRecurringBillingAccountResponse
 
         self.params['trnRecurring'] = '1'
