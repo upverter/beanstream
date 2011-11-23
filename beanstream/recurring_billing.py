@@ -24,8 +24,7 @@ class CreateRecurringBillingAccount(transaction.Purchase):
                 frequency_period to set billing frequency
         """
 
-        super(CreateRecurringBillingAccount, self).__init__(beanstream, amount,
-                card)
+        super(CreateRecurringBillingAccount, self).__init__(beanstream, amount)
         self.response_class = CreateRecurringBillingAccountResponse
 
         self.params['trnRecurring'] = '1'
@@ -36,6 +35,8 @@ class CreateRecurringBillingAccount(transaction.Purchase):
         self.params['rbBillingPeriod'] = frequency_period
 
         self.params['rbBillingIncrement'] = frequency_increment
+
+        self.add_card(card)
 
     def validate(self):
         if not self.has_billing_address:

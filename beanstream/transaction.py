@@ -127,7 +127,7 @@ class Response(object):
 
 class Purchase(Transaction):
 
-    def __init__(self, beanstream_gateway, amount, card):
+    def __init__(self, beanstream_gateway, amount):
         super(Purchase, self).__init__(beanstream_gateway)
         self.url = self.URLS['process_transaction']
         self.response_class = PurchaseResponse
@@ -140,23 +140,26 @@ class Purchase(Transaction):
         self._generate_order_number()
         self.params['trnOrderNumber'] = self.order_number
 
+        self.has_billing_address = False
+        self.has_credit_card = False
+        self.has_customer_code = False
+
+    def validate(self):
+        if (self.has_billing_address or self.has_credit_card) and self.has_customer_code:
+            log.error('billing address or credit card specified with customer code')
+            raise errors.ValidationException('cannot specify both customer code and billing address/credit card')
+
+        if not self.has_customer_code and self.beanstream.REQUIRE_BILLING_ADDRESS and not self.has_billing_address:
+            log.error('billing address required')
+            raise errors.ValidationException('billing address required')
+
+    def add_card(self, card):
         if self.beanstream.REQUIRE_CVD and not card.has_cvd():
             log.error('CVD required')
             raise errors.ValidationException('CVD required')
 
         self.params.update(card.params())
-
-        self.has_billing_address = False
-        self.has_customer_code = False
-
-    def validate(self):
-        if self.has_billing_address and self.has_customer_code:
-            log.error('billing address and customer code both specified')
-            raise errors.ValidationException('cannot specify both customer code and billing address')
-
-        if self.beanstream.REQUIRE_BILLING_ADDRESS and not self.has_billing_address:
-            log.error('billing address required')
-            raise errors.ValidationException('billing address required')
+        self.has_credit_card = True
 
     def add_customer_code(self, customer_code):
         self.params['customerCode'] = customer_code

@@ -137,6 +137,10 @@ class BeanstreamTests(unittest.TestCase):
             visa['cvd'])
 
         txn = self.beanstream.create_payment_profile(card, billing_address=self.billing_address)
-        resp = txn.commit()
-        assert resp.approved()
+        create_resp = txn.commit()
+        assert create_resp.approved()
+
+        txn = self.beanstream.purchase_with_payment_profile(50, create_resp.customer_code())
+        purchase_resp = txn.commit()
+        assert purchase_resp.approved()
 

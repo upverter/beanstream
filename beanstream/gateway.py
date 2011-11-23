@@ -63,7 +63,8 @@ class Beanstream(object):
     def purchase(self, amount, card, billing_address=None):
         """ Performs a one-off credit card purchase.
         """
-        txn = transaction.Purchase(self, amount, card)
+        txn = transaction.Purchase(self, amount)
+        txn.add_card(card)
         if billing_address:
             txn.add_billing_address(billing_address)
 
@@ -106,10 +107,10 @@ class Beanstream(object):
     def modify_payment_profile(self):
         pass
 
-    def purchase_with_payment_profile(self, amount, card, customer_code):
+    def purchase_with_payment_profile(self, amount, customer_code):
         """ Performs a one-off credit card purchase against a payment profile.
         """
-        txn = transaction.Purchase(self, amount, card)
+        txn = transaction.Purchase(self, amount)
         txn.add_customer_code(customer_code)
         return txn
 
