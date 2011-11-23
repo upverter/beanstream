@@ -49,21 +49,6 @@ class PaymentProfileTransaction(transaction.Transaction):
 
         self.params['status'] = status
 
-    def add_customer_code(self, customer_code):
-        self.params['customerCode'] = customer_code
-
-    def set_language(self, language):
-        language = language.upper()
-        if language not in ('ENG', 'FRE'):
-            raise errors.ValidationException('invalid language option specified: %s (must be one of FRE, ENG)' % language)
-        self.params['trnLanguage'] = language
-
-    def set_velocity_id(self, velocity_id):
-        self.params['velocityIdentity'] = velocity_id
-
-    def set_status_id(self, status_id):
-        self.params['statusIdentity'] = status_id
-
 
 class CreatePaymentProfile(PaymentProfileTransaction):
 
