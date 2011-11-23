@@ -21,10 +21,7 @@ class PaymentProfileTransaction(transaction.Transaction):
         self.params['passCode'] = self.beanstream.payment_profile_passcode
         self.params['responseFormat'] = 'QS'
 
-    def add_card(self, card):
-        self.params.update(card.params())
-
-    def add_customer_code(self, customer_code):
+    def set_customer_code(self, customer_code):
         self.params['customerCode'] = customer_code
 
     def set_language(self, language):
@@ -61,7 +58,7 @@ class ModifyPaymentProfile(PaymentProfileTransaction):
         super(ModifyPaymentProfile, self).__init__(beanstream)
 
         self.params['operationType'] = 'M'
-        self.add_customer_code(customer_code)
+        self.set_customer_code(customer_code)
 
 
 class PaymentProfileResponse(transaction.Response):

@@ -36,7 +36,7 @@ class CreateRecurringBillingAccount(transaction.Purchase):
 
         self.params['rbBillingIncrement'] = frequency_increment
 
-        self.add_card(card)
+        self.set_card(card)
 
     def validate(self):
         if not self.has_billing_address:
@@ -52,13 +52,13 @@ class CreateRecurringBillingAccount(transaction.Purchase):
     def set_delay_charge(self, on):
         self.params['rbCharge'] = '0' if on else '1'
 
-    def add_first_date(self, first_date):
+    def set_first_date(self, first_date):
         self.params['rbFirstBilling'] = first_date.strftime('%m%d%Y')
 
-    def add_second_date(self, second_date):
+    def set_second_date(self, second_date):
         self.params['rbSecondBilling'] = second_date.strftime('%m%d%Y')
 
-    def add_expiry(self, expiry):
+    def set_expiry(self, expiry):
         self.params['rbExpiry'] = expiry.strftime('%m%d%Y')
 
     def set_tax1(self, on):

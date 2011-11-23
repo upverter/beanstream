@@ -92,11 +92,19 @@ class Transaction(object):
         decimal_amount = decimal.Decimal(amount)
         return str(decimal_amount.quantize(decimal.Decimal('1.00')))
 
-    def add_billing_address(self, address):
+    def set_card(self, card):
+        if self.beanstream.REQUIRE_CVD and not card.has_cvd():
+            log.error('CVD required')
+            raise errors.ValidationException('CVD required')
+
+        self.params.update(card.params())
+        self.has_credit_card = True
+
+    def set_billing_address(self, address):
         self.params.update(address.params('ord'))
         self.has_billing_address = True
 
-    def add_refs(self, refs):
+    def set_refs(self, refs):
         if len(refs) > 5:
             raise errors.ValidationException('too many ref fields')
 
@@ -150,25 +158,17 @@ class Purchase(Transaction):
             log.error('billing address required')
             raise errors.ValidationException('billing address required')
 
-    def add_card(self, card):
-        if self.beanstream.REQUIRE_CVD and not card.has_cvd():
-            log.error('CVD required')
-            raise errors.ValidationException('CVD required')
-
-        self.params.update(card.params())
-        self.has_credit_card = True
-
-    def add_customer_code(self, customer_code):
+    def set_customer_code(self, customer_code):
         self.params['customerCode'] = customer_code
         self.has_customer_code = True
 
-    def add_shipping_details(self, shipping_details):
+    def set_shipping_details(self, shipping_details):
         pass
 
-    def add_product_details(self, product_details):
+    def set_product_details(self, product_details):
         pass
 
-    def add_comments(self, comments):
+    def set_comments(self, comments):
         self.params['trnComments'] = comments
 
     def set_language(self, language):
