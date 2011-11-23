@@ -72,7 +72,8 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             visa['cvd'])
 
-        resp = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        txn = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        resp = txn.commit()
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
 
@@ -85,7 +86,8 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             '000')
 
-        resp = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        txn = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Mismatch'
 
@@ -99,6 +101,7 @@ class BeanstreamTests(unittest.TestCase):
             str(today.month), str(today.year + 3),
             visa_limit['cvd'])
 
-        resp = self.beanstream.purchase(250, card, 'john.doe@example.com', self.billing_address)
+        txn = self.beanstream.purchase(250, card, 'john.doe@example.com', self.billing_address)
+        resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Match'

@@ -62,8 +62,11 @@ class Beanstream(object):
     def purchase(self, amount, card, email, billing_address=None):
         """ Performs a one-off credit card purchase.
         """
-        txn = transaction.Purchase(self, amount, card, email, billing_address)
-        return txn.commit()
+        txn = transaction.Purchase(self, amount, card, email)
+        if billing_address:
+            txn.add_billing_address(billing_address)
+
+        return txn
 
     def void_purchase(self):
         """ Voids a purchase.

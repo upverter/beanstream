@@ -45,7 +45,14 @@ class Transaction(object):
             self.params['username'] = self.beanstream.username
             self.params['password'] = self.beanstream.password
 
+        self.has_billing_address = False
+
+    def validate(self):
+        pass
+
     def commit(self):
+        self.validate()
+
         # hashing is applicable only to requests sent to the process
         # transaction API.
         data = urllib.urlencode(self.params)
@@ -83,10 +90,11 @@ class Transaction(object):
         """
         self.order_number = ''.join((random.choice(string.ascii_lowercase + string.digits) for x in xrange(30)))
 
-    def _process_billing_address(self, address):
+    def add_billing_address(self, address):
         self.params.update(address.params('ord'))
+        self.has_billing_address = True
 
-    def _process_card(self, card):
+    def add_card(self, card):
         if self.beanstream.REQUIRE_CVD and not card.has_cvd():
             log.error('CVD required')
             raise errors.ValidationException('CVD required')
@@ -120,9 +128,7 @@ class Response(object):
 
 class Purchase(Transaction):
 
-    def __init__(self, beanstream_gateway, amount, card, email,
-            billing_address=None, shipping_details=None, product_details=None,
-            language='ENG', refs=[], comments=None, ip_address=None):
+    def __init__(self, beanstream_gateway, amount, card, email):
         super(Purchase, self).__init__(beanstream_gateway)
         self.url = self.URLS['process_transaction']
         self.response_class = PurchaseResponse
@@ -136,48 +142,41 @@ class Purchase(Transaction):
         self._generate_order_number()
         self.params['trnOrderNumber'] = self.order_number
 
-        self._process_card(card)
+        self.add_card(card)
 
-        if billing_address:
-            self._process_billing_address(billing_address)
-
-        elif self.beanstream.REQUIRE_BILLING_ADDRESS:
+    def validate(self):
+        if self.beanstream.REQUIRE_BILLING_ADDRESS and not self.has_billing_address:
             log.error('billing address required')
             raise errors.ValidationException('billing address required')
 
-        if shipping_details:
-            self._process_shipping_details(shipping_details)
+    def add_shipping_details(self, shipping_details):
+        pass
 
-        if product_details:
-            self._process_product_details(product_details)
+    def add_product_details(self, product_details):
+        pass
 
+    def add_comments(self, comments):
+        self.params['trnComments'] = comments
+
+    def set_language(self, language):
         language = language.upper()
         if language not in ('ENG', 'FRE'):
             raise errors.ValidationException('invalid language option specified: %s (must be one of FRE, ENG)' % language)
         self.params['trnLanguage'] = language
 
-        if refs:
-            if len(refs) > 5:
-                raise errors.ValidationException('too many ref fields')
+    def set_ip_address(self, ip_address):
+        if not self.beanstream.HASH_VALIDATION and not self.beanstream.USERNAME_VALIDATION:
+            log.warn('IP address must be used with either hash or username/password validation; ignoring')
+        else:
+            self.params['customerIP'] = ip_address
 
-            for ref_idx, ref in enumerate(refs, start=1):
-                if ref:
-                    self['ref%s' % ref_idx] = ref
+    def add_refs(self, refs):
+        if len(refs) > 5:
+            raise errors.ValidationException('too many ref fields')
 
-        if comments:
-            self.params['trnComments'] = comments
-
-        if ip_address:
-            if not self.beanstream.HASH_VALIDATION and not self.beanstream.USERNAME_VALIDATION:
-                log.warn('IP address must be used with either hash or username/password validation; ignoring')
-            else:
-                self.params['customerIP'] = ip_address
-
-    def _process_shipping_details(self, shipping_details):
-        pass
-
-    def _process_product_details(self, product_details):
-        pass
+        for ref_idx, ref in enumerate(refs, start=1):
+            if ref:
+                self['ref%s' % ref_idx] = ref
 
 
 class PurchaseResponse(Response):
@@ -230,11 +229,7 @@ class CreateRecurringBillingAccount(Purchase):
     """
 
     def __init__(self, beanstream, amount, card, email, frequency_period,
-            frequency_increment, end_month=False, delay_charge=False,
-            first_date=None, second_date=None, expiry=None, apply_tax1=False,
-            apply_tax2=False, billing_address=None, shipping_details=None,
-            product_details=None, language='ENG', refs=[], comments=None,
-            ip_address=None):
+            frequency_increment):
         """ Create a new recurring billing account creation transaction.
 
         Arguments:
@@ -246,39 +241,10 @@ class CreateRecurringBillingAccount(Purchase):
                 frequency_increment to set billing frequency
             frequency_increment: numeric; used in combination with
                 frequency_period to set billing frequency
-            end_month: True if the customer should be charged on the last day
-                of the month; frequency_period must be M (ignored otherwise)
-                (optional)
-            delay_charge: True to delay charging until the first billing date;
-                False to charge now (optional; default False)
-            first_date: a date object containing the first billing date
-                (optional)
-            second_date: a date object containing the second billing date
-                (optional)
-            expiry: a date object containing the expiry date of the account
-                (optional)
-            apply_tax1: True to apply GST or custom tax 1 (optional; default
-                False)
-            apply_tax2: True to apply PST or custom tax 2 (optional; default
-                False)
-            billing_address: the billing address associated with the card
-                (optional)
-            shipping_details: the shipping details associated with the order
-                (optional)
-            product_details: the product details associated with the order
-                (optional)
-            language: the preferred language of the email receipts (optional;
-                default ENG)
-            refs: a list custom order information, maximum length 5 (optional)
-            comments: comments associated with the order (optional)
-            ip_address: the IP address associated with the order (optional)
         """
 
         super(CreateRecurringBillingAccount, self).__init__(beanstream, amount,
-                card, email, billing_address=billing_address,
-                shipping_details=shipping_details,
-                product_details=product_details, language=language, refs=refs,
-                comments=comments, ip_address=ip_address)
+                card, email)
         self.response_class = CreateRecurringBillingAccountResponse
 
         self.params['trnRecurring'] = '1'
@@ -290,19 +256,34 @@ class CreateRecurringBillingAccount(Purchase):
 
         self.params['rbBillingIncrement'] = frequency_increment
 
-        if frequency_period == 'M':
-            self.params['rbEndMonth'] = '1' if end_month else '0'
-        self.params['rbCharge'] = '0' if delay_charge else '1'
+    def set_end_month(self, on):
+        if self.params['rbBillingPeriod'] != 'M':
+            log.warning('cannot set end_month attribute if billing period is not monthly')
+            return
 
-        if first_date:
-            self.params['rbFirstBilling'] = first_date.strftime('%m%d%Y')
-        if second_date:
-            self.params['rbSecondBilling'] = second_date.strftime('%m%d%Y')
-        if expiry:
-            self.params['rbExpiry'] = expiry.strftime('%m%d%Y')
+        self.params['rbEndMonth'] = '1' if on else '0'
 
-        self.params['rbApplyTax1'] = '1' if apply_tax1 else '0'
-        self.params['rbApplyTax2'] = '1' if apply_tax2 else '0'
+    def set_delay_charge(self, on):
+        self.params['rbCharge'] = '0' if on else '1'
+
+    def add_first_date(self, first_date):
+        self.params['rbFirstBilling'] = first_date.strftime('%m%d%Y')
+
+    def add_second_date(self, second_date):
+        self.params['rbSecondBilling'] = second_date.strftime('%m%d%Y')
+
+    def add_expiry(self, expiry):
+        self.params['rbExpiry'] = expiry.strftime('%m%d%Y')
+
+    def set_tax1(self, on):
+        self.params['rbApplyTax1'] = '1' if on else '0'
+
+    def set_tax2(self, on):
+        self.params['rbApplyTax2'] = '1' if on else '0'
+
+    def set_taxes(self, on):
+        self.set_tax1(on)
+        self.set_tax2(on)
 
 
 class CreateRecurringBillingAccountResponses(PurchaseResponse):
