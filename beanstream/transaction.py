@@ -45,8 +45,6 @@ class Transaction(object):
             self.params['username'] = self.beanstream.username
             self.params['password'] = self.beanstream.password
 
-        self.has_billing_address = False
-
     def validate(self):
         pass
 
@@ -90,17 +88,6 @@ class Transaction(object):
         """
         self.order_number = ''.join((random.choice(string.ascii_lowercase + string.digits) for x in xrange(30)))
 
-    def add_billing_address(self, address):
-        self.params.update(address.params('ord'))
-        self.has_billing_address = True
-
-    def add_card(self, card):
-        if self.beanstream.REQUIRE_CVD and not card.has_cvd():
-            log.error('CVD required')
-            raise errors.ValidationException('CVD required')
-
-        self.params.update(card.params())
-
     def _process_amount(self, amount):
         decimal_amount = decimal.Decimal(amount)
         return str(decimal_amount.quantize(decimal.Decimal('1.00')))
@@ -142,12 +129,31 @@ class Purchase(Transaction):
         self._generate_order_number()
         self.params['trnOrderNumber'] = self.order_number
 
-        self.add_card(card)
+        if self.beanstream.REQUIRE_CVD and not card.has_cvd():
+            log.error('CVD required')
+            raise errors.ValidationException('CVD required')
+
+        self.params.update(card.params())
+
+        self.has_billing_address = False
+        self.has_customer_code = False
 
     def validate(self):
+        if self.has_billing_address and self.has_customer_code:
+            log.error('billing address and customer code both specified')
+            raise errors.ValidationException('cannot specify both customer code and billing address')
+
         if self.beanstream.REQUIRE_BILLING_ADDRESS and not self.has_billing_address:
             log.error('billing address required')
             raise errors.ValidationException('billing address required')
+
+    def add_billing_address(self, address):
+        self.params.update(address.params('ord'))
+        self.has_billing_address = True
+
+    def add_customer_code(self, customer_code):
+        self.params['customerCode'] = customer_code
+        self.has_customer_code = True
 
     def add_shipping_details(self, shipping_details):
         pass
@@ -255,6 +261,10 @@ class CreateRecurringBillingAccount(Purchase):
         self.params['rbBillingPeriod'] = frequency_period
 
         self.params['rbBillingIncrement'] = frequency_increment
+
+    def validate(self):
+        if not self.has_billing_address:
+            raise errors.ValidationException('recurring billing creation requires a billing address')
 
     def set_end_month(self, on):
         if self.params['rbBillingPeriod'] != 'M':
