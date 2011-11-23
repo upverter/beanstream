@@ -296,7 +296,7 @@ class CreateRecurringBillingAccount(Purchase):
         self.set_tax2(on)
 
 
-class CreateRecurringBillingAccountResponses(PurchaseResponse):
+class CreateRecurringBillingAccountResponse(PurchaseResponse):
 
     def account_id(self):
         ''' The account id for the recurring billing account. '''
