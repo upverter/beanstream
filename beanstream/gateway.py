@@ -1,4 +1,5 @@
-import errors, transaction
+from beanstream import errors
+from beanstream import transaction
 
 class Beanstream(object):
 
