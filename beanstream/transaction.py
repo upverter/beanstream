@@ -34,6 +34,7 @@ class Transaction(object):
 
     def __init__(self, beanstream):
         self.beanstream = beanstream
+        self.response_class = Response
 
         self.params = {}
         self.hashcode = None
@@ -75,7 +76,7 @@ class Transaction(object):
         log.debug('Beanstream response: %s', body)
         log.debug(response)
 
-        return PurchaseResponse(response)
+        return self.response_class(response)
 
     def _generate_order_number(self):
         """ Generate a random 30-digit alphanumeric string.
@@ -97,11 +98,32 @@ class Transaction(object):
         return str(decimal_amount.quantize(decimal.Decimal('1.00')))
 
 
+class Response(object):
+
+    def __init__(self, resp_dict):
+        self.resp = resp_dict
+
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__, self.resp)
+
+    def __str__(self):
+        return '%s <transaction_id: %s, order_number: %s>' % (self.__class__, self.transaction_id(), self.order_number())
+
+    def order_number(self):
+        ''' Order number assigned in the transaction request. '''
+        return self.resp.get('trnOrderNumber', [None])[0]
+
+    def transaction_id(self):
+        ''' Beanstream transaction identifier '''
+        return self.resp.get('trnId', [None])[0]
+
+
 class Purchase(Transaction):
 
     def __init__(self, beanstream_gateway, amount, card, email, billing_address):
         super(Purchase, self).__init__(beanstream_gateway)
         self.url = self.URLS['process_transaction']
+        self.response_class = PurchaseResponse
 
         self.params['merchant_id'] = self.beanstream.merchant_id
         self.params['trnAmount'] = self._process_amount(amount)
@@ -121,15 +143,7 @@ class Purchase(Transaction):
             log.error('billing address required')
             raise errors.ValidationException('billing address required')
 
-class PurchaseResponse(object):
-    def __init__(self, resp_dict):
-        self.resp = resp_dict
-
-    def __repr__(self):
-        return '%s(%s)' % (self.__class__, self.resp)
-
-    def __str__(self):
-        return 'PurchaseResponse <transaction_id: %s, order_number: %s>' % (self.transaction_id(), self.order_number())
+class PurchaseResponse(Response):
 
     def cvd_status(self):
         cvd_statuses = {'1': 'CVD Match',
@@ -155,14 +169,6 @@ class PurchaseResponse(object):
             return response_codes[self.resp['messageId'][0]]['merchant_message']
         else:
             return None
-
-    def order_number(self):
-        ''' Order number assigned in the transaction request. '''
-        return self.resp.get('trnOrderNumber', [None])[0]
-
-    def transaction_id(self):
-        ''' Beanstream transaction identifier '''
-        return self.resp.get('trnId', [None])[0]
 
     def transaction_amount(self):
         ''' The amount the transaction was for. '''
