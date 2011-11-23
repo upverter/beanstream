@@ -1,4 +1,4 @@
-from beanstream import errors, payment_profiles, transaction, recurring_billing
+from beanstream import errors, payment_profiles, process_transaction, recurring_billing
 
 class Beanstream(object):
 
@@ -64,7 +64,7 @@ class Beanstream(object):
     def purchase(self, amount, card, billing_address=None):
         """ Returns a Purchase object with the specified options.
         """
-        txn = transaction.Purchase(self, amount)
+        txn = process_transaction.Purchase(self, amount)
         txn.set_card(card)
         if billing_address:
             txn.set_billing_address(billing_address)
@@ -107,7 +107,7 @@ class Beanstream(object):
     def purchase_with_payment_profile(self, amount, customer_code):
         """ Returns a Purchase object with the specified options.
         """
-        txn = transaction.Purchase(self, amount)
+        txn = process_transaction.Purchase(self, amount)
         txn.set_customer_code(customer_code)
         return txn
 

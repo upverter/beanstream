@@ -1,12 +1,12 @@
 import logging
 import re
 
-from beanstream import errors, transaction
+from beanstream import errors, process_transaction, transaction
 
 log = logging.getLogger('beanstream.recurring_billing')
 
 
-class CreateRecurringBillingAccount(transaction.Purchase):
+class CreateRecurringBillingAccount(process_transaction.Purchase):
     """ Creating a recurring billing account is essentially doing a purchase
     transaction with some options specifying recurring billing.
     """
@@ -66,7 +66,7 @@ class CreateRecurringBillingAccount(transaction.Purchase):
         self.set_tax2(on)
 
 
-class CreateRecurringBillingAccountResponse(transaction.PurchaseResponse):
+class CreateRecurringBillingAccountResponse(process_transaction.PurchaseResponse):
 
     def account_id(self):
         ''' The account id for the recurring billing account. '''
