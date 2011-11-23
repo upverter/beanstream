@@ -77,11 +77,14 @@ class Transaction(object):
             log.error('hash validation required')
             return False
 
-        response = urlparse.parse_qs(body)
+        response = self.parse_raw_response(body)
         log.debug('Beanstream response: %s', body)
         log.debug(response)
 
         return self.response_class(response)
+
+    def parse_raw_response(self, body):
+        return urlparse.parse_qs(body)
 
     def _generate_order_number(self):
         """ Generate a random 30-digit alphanumeric string.
