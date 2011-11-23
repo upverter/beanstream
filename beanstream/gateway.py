@@ -65,7 +65,7 @@ class Beanstream(object):
     def void_purchase(self):
         """ Voids a purchase.
         """
-        raise NotImplementedException
+        raise NotImplementedError
 
     def return_purchase(self):
         pass
