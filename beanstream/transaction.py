@@ -75,7 +75,7 @@ class Transaction(object):
         log.debug('Beanstream response: %s', body)
         log.debug(response)
 
-        return response
+        return PurchaseResponse(response)
 
     def _generate_order_number(self):
         """ Generate a random 30-digit alphanumeric string.
@@ -120,6 +120,65 @@ class Purchase(Transaction):
         elif self.beanstream.REQUIRE_BILLING_ADDRESS:
             log.error('billing address required')
             raise errors.ValidationException('billing address required')
+
+class PurchaseResponse(object):
+    def __init__(self, resp_dict):
+        self.resp = resp_dict
+
+    def __repr__(self):
+        return '%s(%s)' % (self.__class__, self.resp)
+
+    def __str__(self):
+        return 'PurchaseResponse <transaction_id: %s, order_number: %s>' % (self.transaction_id(), self.order_number())
+
+    def cvd_status(self):
+        cvd_statuses = {'1': 'CVD Match',
+                        '2': 'CVD Mismatch',
+                        '3': 'CVD Not Verified',
+                        '4': 'CVD Should have been present',
+                        '5': 'CVD Issuer unable to process request',
+                        '6': 'CVD Not Provided',
+                        }
+        if 'cvdId' in self.resp:
+            return cvd_statuses[self.resp['cvdId'][0]]
+        else:
+            return None
+
+    def get_cardholder_message(self):
+        if 'messageId' in self.resp:
+            return response_codes[self.resp['messageId'][0]]['cardholder_message']
+        else:
+            return None
+
+    def get_merchant_message(self):
+        if 'messageId' in self.resp:
+            return response_codes[self.resp['messageId'][0]]['merchant_message']
+        else:
+            return None
+
+    def order_number(self):
+        ''' Order number assigned in the transaction request. '''
+        return self.resp.get('trnOrderNumber', [None])[0]
+
+    def transaction_id(self):
+        ''' Beanstream transaction identifier '''
+        return self.resp.get('trnId', [None])[0]
+
+    def transaction_amount(self):
+        ''' The amount the transaction was for. '''
+        return self.resp.get('trnAmount', [None])[0]
+
+    def transaction_datetime(self):
+        ''' The date and time that the transaction was processed. '''
+        return self.resp.get('trnDate', [None])[0]
+
+    def approved(self):
+        ''' Boolean if the transaction was approved or not '''
+        return self.resp.get('trnApproved', ['0'])[0] == '1'
+
+    def auth_code(self):
+        ''' if the transaction is approved this parameter will contain a unique bank-issued code '''
+        return self.resp.get('authCode', [None])[0]
 
 
 class CreateRecurringBillingAccount(Purchase):
