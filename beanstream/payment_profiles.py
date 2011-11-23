@@ -14,7 +14,7 @@ class CreatePaymentProfile(transaction.Transaction):
         self.response_class = CreatePaymentProfileResponse
 
         if not self.beanstream.payment_profile_passcode:
-            raise errors.ConfigurationException('payment profile passcode must be specified to create payment profiles')
+            raise errors.ConfigurationException('payment profile passcode must be specified to create or payment profiles')
 
         self.params['serviceVersion'] = '1.0'
         self.params['merchantId'] = self.beanstream.merchant_id
@@ -55,18 +55,8 @@ class CreatePaymentProfileResponse(transaction.Response):
         return self.resp.get('trnOrderNumber', [None])[0]
 
     def approved(self):
-        return self.resp.get('trnApproved', ['0'])[0] == '1'
+        return self.resp.get('responseCode', ['0'])[0] == '1'
 
-    def get_cardholder_message(self):
-        if 'messageId' in self.resp:
-            return response_codes[self.resp['messageId'][0]]['cardholder_message']
-        else:
-            return None
-
-    def get_merchant_message(self):
-        if 'messageId' in self.resp:
-            return response_codes[self.resp['messageId'][0]]['merchant_message']
-        else:
-            return None
-
+    def get_message(self):
+        return self.resp.get('responseMessage', ['0'])[0] == '1'
 
