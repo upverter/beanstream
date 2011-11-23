@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 import ConfigParser
+=======
+from datetime import date
+>>>>>>> add tests for failed cvd, credit card over limit
 import unittest
 
-import beanstream.beanstream
-import beanstream.billing
+from beanstream import gateway
+from beanstream import billing
+
 
 class BeanstreamTests(unittest.TestCase):
 
@@ -32,18 +37,23 @@ class BeanstreamTests(unittest.TestCase):
                 hashcode=hashcode,
                 hash_algorithm=hash_algorithm)
 
-    def tearDown(self):
-        pass
+        self.approved_cards = {'visa': {'number': '4030000010001234', 'cvd': '123'},
+                               '100_visa': {'number': '4504481742333', 'cvd': '123'},
+                               'vbv_visa': {'nubmer': '4123450131003312', 'cvd': '123', 'vbv': '12345'},
+                               'mc1': {'number': '5100000010001004', 'cvd': '123'},
+                               'mc2': {'number': '5194930004875020', 'cvd': '123'},
+                               'mc3': {'number': '5123450000002889', 'cvd': '123'},
+                               '3d_mc': {'number': '5123450000000000', 'cvd': '123', 'passcode': '12345'},
+                               'amex': {'number': '371100001000131', 'cvd': '1234'},
+                               'discover': {'number': '6011500080009080', 'cvd': '123'},
+                              }
+        self.declined_cards = {'visa': {'number': '4003050500040005', 'cvd': '123'},
+                               'mc': {'number': '5100000020002000', 'cvd': '123'},
+                               'amex': {'number': '342400001000180', 'cvd': '1234'},
+                               'discover': {'number': '6011000900901111', 'cvd': '123'},
+                              }
 
-    def test_purchase(self):
-        card = beanstream.billing.CreditCard(
-            'John Doe',
-            '4030000010001234',
-            '05',
-            '2015',
-            '123')
-
-        billing_address = beanstream.billing.Address(
+        self.billing_address = billing.Address(
             'John Doe',
             '555-555-5555',
             '123 Fake Street',
@@ -53,6 +63,45 @@ class BeanstreamTests(unittest.TestCase):
             'A1A1A1',
             'CA')
 
-        self.beanstream.purchase(50, card, 'john.doe@example.com', billing_address)
-        assert False
+    def tearDown(self):
+        pass
 
+    def test_successful_cc_purchase(self):
+        today = date.today()
+        visa = self.approved_cards['visa']
+        card = billing.CreditCard(
+            'John Doe',
+            visa['number'],
+            str(today.month), str(today.year + 3),
+            visa['cvd'])
+
+        resp = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        assert resp.approved()
+        assert resp.cvd_status() == 'CVD Match'
+
+    def test_failed_cvd(self):
+        today = date.today()
+        visa = self.approved_cards['visa']
+        card = billing.CreditCard(
+            'John Doe',
+            visa['number'],
+            str(today.month), str(today.year + 3),
+            '000')
+
+        resp = self.beanstream.purchase(50, card, 'john.doe@example.com', self.billing_address)
+        assert not resp.approved()
+        assert resp.cvd_status() == 'CVD Mismatch'
+
+
+    def test_over_limit_cc_purchase(self):
+        today = date.today()
+        visa_limit = self.approved_cards['100_visa']
+        card = billing.CreditCard(
+            'John Doe',
+            visa_limit['number'],
+            str(today.month), str(today.year + 3),
+            visa_limit['cvd'])
+
+        resp = self.beanstream.purchase(250, card, 'john.doe@example.com', self.billing_address)
+        assert not resp.approved()
+        assert resp.cvd_status() == 'CVD Match'
