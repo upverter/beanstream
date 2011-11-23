@@ -105,3 +105,20 @@ class BeanstreamTests(unittest.TestCase):
         resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Match'
+
+    def test_create_recurring_billing(self):
+        today = date.today()
+        visa = self.approved_cards['visa']
+        card = billing.CreditCard(
+            'John Doe',
+            visa['number'],
+            str(today.month), str(today.year + 3),
+            visa['cvd'])
+
+        txn = self.beanstream.create_recurring_billing_account(50, card, 'john.doe@example.com', 'w', 2, billing_address=self.billing_address)
+        resp = txn.commit()
+        assert resp.approved()
+        assert resp.cvd_status() == 'CVD Match'
+        assert resp.account_id() is not None
+        assert False
+
