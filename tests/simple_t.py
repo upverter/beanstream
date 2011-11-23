@@ -21,12 +21,17 @@ class BeanstreamTests(unittest.TestCase):
         if config.has_option('beanstream', 'hash_algorithm'):
             hash_algorithm = config.get('beanstream', 'hash_algorithm')
 
+        payment_profile_passcode = None
+        if config.has_option('beanstream', 'payment_profile_passcode'):
+            payment_profile_passcode = config.get('beanstream', 'payment_profile_passcode')
+
         hash_validation = config.has_option('config', 'hash_validation')
         require_billing_address = config.has_option('config', 'require_billing_address')
         require_cvd = config.has_option('config', 'require_cvd')
 
         self.beanstream = gateway.Beanstream(
                 hash_validation=hash_validation,
+                payment_profile_passcode=payment_profile_passcode,
                 require_billing_address=require_billing_address,
                 require_cvd=require_cvd)
         self.beanstream.configure(
@@ -120,5 +125,19 @@ class BeanstreamTests(unittest.TestCase):
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
         assert resp.account_id() is not None
+        assert False
+
+    def test_payment_profiles(self):
+        today = date.today()
+        visa = self.approved_cards['visa']
+        card = billing.CreditCard(
+            'John Doe',
+            visa['number'],
+            str(today.month), str(today.year + 3),
+            visa['cvd'])
+
+        txn = self.beanstream.create_payment_profile(card, billing_address=self.billing_address)
+        resp = txn.commit()
+        assert resp.approved()
         assert False
 

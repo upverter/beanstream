@@ -34,6 +34,7 @@ class Beanstream(object):
         self.username = None
         self.password = None
         self.hashcode = None
+        self.payment_profile_passcode = None
 
     def configure(self, merchant_id, **params):
         """ Configure the gateway.
@@ -49,6 +50,7 @@ class Beanstream(object):
         self.hash_algorithm = params.get('hash_algorithm', None)
         self.username = params.get('username', None)
         self.password = params.get('password', None)
+        self.payment_profile_passcode = params.get('payment_profile_passcode', None)
 
         if self.HASH_VALIDATION and (not self.hashcode or not self.hash_algorithm):
             raise errors.ConfigurationException('hashcode and algorithm must be specified')
@@ -93,16 +95,24 @@ class Beanstream(object):
         pass
 
 
-    def create_profile(self):
+    def create_payment_profile(self, card, billing_address=None):
+        """ Creates a payment profile with the specified information.
+        """
+        txn = transaction.CreatePaymentProfile(self, card)
+        if billing_address:
+            txn.add_billing_address(billing_address)
+
+        return txn
+
+    def modify_payment_profile(self):
         pass
 
-    def modify_profile(self):
-        pass
-
-    def purchase_with_profile(self):
+    def purchase_with_payment_profile(self, amount, card, email, customer_code):
         """ Performs a one-off credit card purchase against a payment profile.
         """
-        pass
+        txn = transaction.Purchase(self, amount, card, email)
+        txn.add_customer_code(customer_code)
+        return txn
 
     def create_recurring_billing_account(self, amount, card, email,
             frequency_period, frequency_increment, billing_address=None):
