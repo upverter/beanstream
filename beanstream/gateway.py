@@ -124,6 +124,7 @@ class Beanstream(object):
 
         return txn
 
-    def modify_recurring_billing_account(self):
-        pass
+    def modify_recurring_billing_account(self, account_id):
+        txn = recurring_billing.ModifyRecurringBillingAccount(self, account_id)
+        return txn
 
