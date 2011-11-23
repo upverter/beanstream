@@ -64,9 +64,9 @@ class Beanstream(object):
         """ Performs a one-off credit card purchase.
         """
         txn = transaction.Purchase(self, amount)
-        txn.add_card(card)
+        txn.set_card(card)
         if billing_address:
-            txn.add_billing_address(billing_address)
+            txn.set_billing_address(billing_address)
 
         return txn
 
@@ -100,7 +100,7 @@ class Beanstream(object):
         """
         txn = payment_profiles.CreatePaymentProfile(self, card)
         if billing_address:
-            txn.add_billing_address(billing_address)
+            txn.set_billing_address(billing_address)
 
         return txn
 
@@ -112,7 +112,7 @@ class Beanstream(object):
         """ Performs a one-off credit card purchase against a payment profile.
         """
         txn = transaction.Purchase(self, amount)
-        txn.add_customer_code(customer_code)
+        txn.set_customer_code(customer_code)
         return txn
 
     def create_recurring_billing_account(self, amount, card, frequency_period,
@@ -120,7 +120,7 @@ class Beanstream(object):
         txn = recurring_billing.CreateRecurringBillingAccount(self, amount, card,
                 frequency_period, frequency_increment)
         if billing_address:
-            txn.add_billing_address(billing_address)
+            txn.set_billing_address(billing_address)
 
         return txn
 
