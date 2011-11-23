@@ -104,8 +104,9 @@ class Beanstream(object):
 
         return txn
 
-    def modify_payment_profile(self):
-        pass
+    def modify_payment_profile(self, customer_code):
+        txn = payment_profiles.ModifyPaymentProfile(self, customer_code)
+        return txn
 
     def purchase_with_payment_profile(self, amount, customer_code):
         """ Performs a one-off credit card purchase against a payment profile.
