@@ -120,7 +120,9 @@ class Response(object):
 
 class Purchase(Transaction):
 
-    def __init__(self, beanstream_gateway, amount, card, email, billing_address):
+    def __init__(self, beanstream_gateway, amount, card, email,
+            billing_address=None, shipping_details=None, product_details=None,
+            language='ENG', refs=[], comments=None, ip_address=None):
         super(Purchase, self).__init__(beanstream_gateway)
         self.url = self.URLS['process_transaction']
         self.response_class = PurchaseResponse
@@ -142,6 +144,41 @@ class Purchase(Transaction):
         elif self.beanstream.REQUIRE_BILLING_ADDRESS:
             log.error('billing address required')
             raise errors.ValidationException('billing address required')
+
+        if shipping_details:
+            self._process_shipping_details(shipping_details)
+
+        if product_details:
+            self._process_product_details(product_details)
+
+        language = language.upper()
+        if language not in ('ENG', 'FRE'):
+            raise errors.ValidationException('invalid language option specified: %s (must be one of FRE, ENG)' % language)
+        self.params['trnLanguage'] = language
+
+        if refs:
+            if len(refs) > 5:
+                raise errors.ValidationException('too many ref fields')
+
+            for ref_idx, ref in enumerate(refs, start=1):
+                if ref:
+                    self['ref%s' % ref_idx] = ref
+
+        if comments:
+            self.params['trnComments'] = comments
+
+        if ip_address:
+            if not self.beanstream.HASH_VALIDATION and not self.beanstream.USERNAME_VALIDATION:
+                log.warn('IP address must be used with either hash or username/password validation; ignoring')
+            else:
+                self.params['customerIP'] = ip_address
+
+    def _process_shipping_details(self, shipping_details):
+        pass
+
+    def _process_product_details(self, product_details):
+        pass
+
 
 class PurchaseResponse(Response):
 
