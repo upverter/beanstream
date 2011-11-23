@@ -1,6 +1,6 @@
+import decimal
 import hashlib
 import logging
-import money
 import random
 import string
 import urllib
@@ -92,7 +92,8 @@ class Transaction(object):
         self.params.update(card.params())
 
     def _process_amount(self, amount):
-        return "%5.2f" % money.Money(amount).amount
+        decimal_amount = decimal.Decimal(amount)
+        return str(decimal_amount.quantize(decimal.Decimal('1.00')))
 
 
 class Purchase(Transaction):
