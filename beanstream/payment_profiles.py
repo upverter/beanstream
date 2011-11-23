@@ -19,7 +19,7 @@ class CreatePaymentProfile(transaction.Transaction):
         self.params['serviceVersion'] = '1.0'
         self.params['merchantId'] = self.beanstream.merchant_id
         self.params['operationType'] = 'N'
-        self.params['passcode'] = self.beanstream.payment_profile_passcode
+        self.params['passCode'] = self.beanstream.payment_profile_passcode
         self.params['responseFormat'] = 'QS'
 
         self._generate_order_number()
