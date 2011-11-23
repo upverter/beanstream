@@ -104,9 +104,14 @@ class Beanstream(object):
         """
         pass
 
-    def create_recurring_billing_account(self, amount, card, email, billing_address=None):
-        txn = transaction.CreateRecurringBillingAccount(self, amount, card, email, billing_address)
-        txn.commit()
+    def create_recurring_billing_account(self, amount, card, email,
+            frequency_period, frequency_increment, billing_address=None):
+        txn = transaction.CreateRecurringBillingAccount(self, amount, card,
+                email, frequency_period, frequency_increment)
+        if billing_address:
+            txn.add_billing_address(billing_address)
+
+        return txn
 
     def modify_recurring_billing_account(self):
         pass
