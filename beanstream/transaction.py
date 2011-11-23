@@ -37,13 +37,13 @@ class Transaction(object):
         self.response_class = Response
 
         self.params = {}
-        self.hashcode = None
-        if self.beanstream.HASH_VALIDATION:
-            self.hashcode = self.beanstream.hashcode
 
-        elif self.beanstream.USERNAME_VALIDATION:
+        if self.beanstream.USERNAME_VALIDATION:
             self.params['username'] = self.beanstream.username
             self.params['password'] = self.beanstream.password
+
+        self._generate_order_number()
+        self.params['trnOrderNumber'] = self.order_number
 
     def validate(self):
         pass
@@ -136,9 +136,6 @@ class Purchase(Transaction):
         self.params['trnAmount'] = self._process_amount(amount)
         self.params['requestType'] = 'BACKEND'
         self.params['trnType'] = Transaction.TRN_TYPES['purchase']
-
-        self._generate_order_number()
-        self.params['trnOrderNumber'] = self.order_number
 
         self.has_billing_address = False
         self.has_credit_card = False

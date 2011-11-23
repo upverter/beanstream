@@ -21,9 +21,6 @@ class PaymentProfileTransaction(transaction.Transaction):
         self.params['passCode'] = self.beanstream.payment_profile_passcode
         self.params['responseFormat'] = 'QS'
 
-        self._generate_order_number()
-        self.params['trnOrderNumber'] = self.order_number
-
     def add_card(self, card):
         self.params.update(card.params())
 
