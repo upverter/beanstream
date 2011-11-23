@@ -31,13 +31,13 @@ class BeanstreamTests(unittest.TestCase):
 
         self.beanstream = gateway.Beanstream(
                 hash_validation=hash_validation,
-                payment_profile_passcode=payment_profile_passcode,
                 require_billing_address=require_billing_address,
                 require_cvd=require_cvd)
         self.beanstream.configure(
                 merchant_id,
                 hashcode=hashcode,
-                hash_algorithm=hash_algorithm)
+                hash_algorithm=hash_algorithm,
+                payment_profile_passcode=payment_profile_passcode)
 
         self.approved_cards = {'visa': {'number': '4030000010001234', 'cvd': '123'},
                                '100_visa': {'number': '4504481742333', 'cvd': '123'},
