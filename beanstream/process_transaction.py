@@ -98,3 +98,33 @@ class PurchaseResponse(transaction.Response):
         ''' if the transaction is approved this parameter will contain a unique bank-issued code '''
         return self.resp.get('authCode', [None])[0]
 
+
+class PreAuthorization(Purchase):
+
+    def __init__(self, beanstream_gateway, amount):
+        super(PreAuthorization, self).__init__(beanstream_gateway, amount)
+
+        self.params['trnType'] = self.TRN_TYPES['preauth']
+
+
+class Adjustment(transaction.Transaction):
+
+    RETURN = 'R'
+    VOID = 'V'
+    PREAUTH_COMPLETION = 'PAC'
+    VOID_RETURN = 'VR'
+    VOID_PURCHASE = 'VP'
+
+    def __init__(self, beanstream_gateway, adjustment_type, transaction_id, amount):
+        super(PreAuthorizationCompletion, self).__init__(beanstream_gateway)
+
+        if not beanstream_gateway.HASH_VALIDATION and not beanstream_gateway.USERNAME_VALIDATION:
+            raise errors.ConfigurationException('adjustments must be performed with either hash or username/password validation')
+
+        if adjustment_type not in [self.RETURN, self.VOID, self.PREAUTH_COMPLETION, self.VOID_RETURN, self.VOID_PURCHASE]:
+            raise errors.ConfigurationException('invalid adjustment_type specified: %s' % adjustment_type)
+
+        self.params['trnType'] = adjustment_type
+        self.params['adjId'] = transaction_id
+        self.params['trnAmount'] = self._process_amount(amount)
+

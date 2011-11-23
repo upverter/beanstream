@@ -71,23 +71,50 @@ class Beanstream(object):
 
         return txn
 
-    def void_purchase(self):
-        raise NotImplementedError
+    def void_purchase(self, transaction_id, amount):
+        """ Returns an Adjustment object configured for voiding the specified
+        transaction for the specified amount.
+        """
+        txn = process_transaction.Adjustment(self, process_transaction.Adjustment.VOID, transaction_id, amount)
+        return txn
 
-    def return_purchase(self):
-        raise NotImplementedError
+    def return_purchase(self, transaction_id, amount):
+        """ Returns an Adjustment object configured for returning the specified
+        transaction for the specified amount.
+        """
+        txn = process_transaction.Adjustment(self, process_transaction.Adjustment.RETURN, transaction_id, amount)
+        return txn
 
-    def void_return(self):
-        raise NotImplementedError
+    def void_return(self, transaction_id, amount):
+        """ Returns an Adjustment object configured for voiding the return of
+        the specified transaction for the specified amount.
+        """
+        txn = process_transaction.Adjustment(self, process_transaction.Adjustment.VOID_RETURN, transaction_id, amount)
+        return txn
 
-    def preauth(self):
-        raise NotImplementedError
+    def preauth(self, amount, card, billing_address=None):
+        """ Returns a PreAuthorization object with the specified options.
+        """
+        txn = process_transaction.PreAuthorization(self, amount)
+        txn.set_card(card)
+        if billing_address:
+            txn.set_billing_address(billing_address)
 
-    def cancel_preauth(self):
-        raise NotImplementedError
+        return txn
 
-    def preauth_completion(self):
-        raise NotImplementedError
+    def preauth_completion(self, transaction_id, amount):
+        """ Returns an Adjustment object configured for completing the
+        preauthorized transaction for the specified amount.
+        """
+        txn = process_transaction.Adjustment(self, process_transaction.Adjustment.PREAUTH_COMPLETION, transaction_id, amount)
+        return txn
+
+    def cancel_preauth(self, transaction_id): 
+        """ Returns an Adjustment object configured for cancelling the
+        preauthorized transaction.
+        """
+        txn = process_transaction.Adjustment(self, process_transaction.Adjustment.PREAUTH_COMPLETION, transaction_id, 0)
+        return txn
 
     def create_payment_profile(self, card, billing_address=None):
         """ Returns a CreatePaymentProfile object with the specified options.
@@ -109,6 +136,16 @@ class Beanstream(object):
         """
         txn = process_transaction.Purchase(self, amount)
         txn.set_customer_code(customer_code)
+        return txn
+
+    def preauth_with_payment_profile(self, amount, customer_code):
+        """ Returns a PreAuthorization object with the specified options.
+        """
+        txn = process_transaction.PreAuthorization(self, amount)
+        txn.set_card(card)
+        if billing_address:
+            txn.set_billing_address(billing_address)
+
         return txn
 
     def create_recurring_billing_account_from_payment_profile(self, amount,
