@@ -149,19 +149,24 @@ class BeanstreamTests(unittest.TestCase):
             visa['cvd'])
 
         txn = self.beanstream.create_payment_profile(card, billing_address=self.billing_address)
-        create_resp = txn.commit()
-        assert create_resp.approved()
+        resp = txn.commit()
+        assert resp.approved()
 
-        txn = self.beanstream.purchase_with_payment_profile(50, create_resp.customer_code())
-        purchase_resp = txn.commit()
-        assert purchase_resp.approved()
+        customer_code = resp.customer_code()
 
-        txn = self.beanstream.modify_payment_profile(create_resp.customer_code())
+        txn = self.beanstream.purchase_with_payment_profile(50, customer_code)
+        resp = txn.commit()
+        assert resp.approved()
+
+        txn = self.beanstream.modify_payment_profile(customer_code)
         txn.set_status('D')
-        modify_resp = txn.commit()
-        assert modify_resp.approved()
+        resp = txn.commit()
+        assert resp.approved()
 
-        txn = self.beanstream.purchase_with_payment_profile(50, create_resp.customer_code())
-        purchase_resp2 = txn.commit()
-        assert not purchase_resp2.approved()
+        txn = self.beanstream.purchase_with_payment_profile(50, customer_code)
+        resp = txn.commit()
+        assert not resp.approved()
+
+    def test_payment_profile_with_recurring_billing(self):
+        pass
 
