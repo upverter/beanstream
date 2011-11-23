@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import ConfigParser
-=======
 from datetime import date
->>>>>>> add tests for failed cvd, credit card over limit
 import unittest
 
 from beanstream import gateway
@@ -28,7 +25,7 @@ class BeanstreamTests(unittest.TestCase):
         require_billing_address = config.has_option('config', 'require_billing_address')
         require_cvd = config.has_option('config', 'require_cvd')
 
-        self.beanstream = beanstream.beanstream.Beanstream(
+        self.beanstream = gateway.Beanstream(
                 hash_validation=hash_validation,
                 require_billing_address=require_billing_address,
                 require_cvd=require_cvd)
