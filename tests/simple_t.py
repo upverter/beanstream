@@ -25,6 +25,10 @@ class BeanstreamTests(unittest.TestCase):
         if config.has_option('beanstream', 'payment_profile_passcode'):
             payment_profile_passcode = config.get('beanstream', 'payment_profile_passcode')
 
+        recurring_billing_passcode = None
+        if config.has_option('beanstream', 'recurring_billing_passcode'):
+            recurring_billing_passcode = config.get('beanstream', 'recurring_billing_passcode')
+
         hash_validation = config.has_option('config', 'hash_validation')
         require_billing_address = config.has_option('config', 'require_billing_address')
         require_cvd = config.has_option('config', 'require_cvd')
@@ -37,7 +41,8 @@ class BeanstreamTests(unittest.TestCase):
                 merchant_id,
                 hashcode=hashcode,
                 hash_algorithm=hash_algorithm,
-                payment_profile_passcode=payment_profile_passcode)
+                payment_profile_passcode=payment_profile_passcode,
+                recurring_billing_passcode=recurring_billing_passcode)
 
         self.approved_cards = {'visa': {'number': '4030000010001234', 'cvd': '123'},
                                '100_visa': {'number': '4504481742333', 'cvd': '123'},
@@ -126,6 +131,13 @@ class BeanstreamTests(unittest.TestCase):
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
         assert resp.account_id() is not None
+
+        account_id = resp.account_id()
+
+        txn = self.beanstream.modify_recurring_billing_account(account_id)
+        txn.set_billing_state('C')
+        resp = txn.commit()
+        assert resp.approved()
 
     def test_payment_profiles(self):
         today = date.today()

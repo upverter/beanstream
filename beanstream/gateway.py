@@ -50,6 +50,7 @@ class Beanstream(object):
         self.username = params.get('username', None)
         self.password = params.get('password', None)
         self.payment_profile_passcode = params.get('payment_profile_passcode', None)
+        self.recurring_billing_passcode = params.get('recurring_billing_passcode', None)
 
         if self.HASH_VALIDATION and (not self.hashcode or not self.hash_algorithm):
             raise errors.ConfigurationException('hashcode and algorithm must be specified')
