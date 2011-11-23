@@ -11,14 +11,13 @@ class CreateRecurringBillingAccount(transaction.Purchase):
     transaction with some options specifying recurring billing.
     """
 
-    def __init__(self, beanstream, amount, card, frequency_period,
+    def __init__(self, beanstream, amount, frequency_period,
             frequency_increment):
         """ Create a new recurring billing account creation transaction.
 
         Arguments:
             beanstream: gateway object
             amount: the amount to charge on a recurring basis
-            card: the CreditCard object to charge
             frequency_period: one of DWMY; used in combination with
                 frequency_increment to set billing frequency
             frequency_increment: numeric; used in combination with
@@ -36,12 +35,6 @@ class CreateRecurringBillingAccount(transaction.Purchase):
         self.params['rbBillingPeriod'] = frequency_period
 
         self.params['rbBillingIncrement'] = frequency_increment
-
-        self.set_card(card)
-
-    def validate(self):
-        if not self.has_billing_address:
-            raise errors.ValidationException('recurring billing creation requires a billing address')
 
     def set_end_month(self, on):
         if self.params['rbBillingPeriod'] != 'M':

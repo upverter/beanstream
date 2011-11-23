@@ -116,10 +116,18 @@ class Beanstream(object):
         txn.set_customer_code(customer_code)
         return txn
 
+    def create_recurring_billing_account_with_payment_profile(self, amount,
+            customer_code, frequency_period, frequency_increment):
+        txn = recurring_billing.CreateRecurringBillingAccount(self, amount,
+                frequency_period, frequency_increment)
+        txn.set_customer_code(customer_code)
+        return txn
+
     def create_recurring_billing_account(self, amount, card, frequency_period,
             frequency_increment, billing_address=None):
-        txn = recurring_billing.CreateRecurringBillingAccount(self, amount, card,
+        txn = recurring_billing.CreateRecurringBillingAccount(self, amount,
                 frequency_period, frequency_increment)
+        txn.set_card(card)
         if billing_address:
             txn.set_billing_address(billing_address)
 
