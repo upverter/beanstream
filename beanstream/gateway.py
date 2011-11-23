@@ -1,5 +1,4 @@
-from beanstream import errors
-from beanstream import transaction
+from beanstream import errors, payment_profiles, transaction, recurring_billing
 
 class Beanstream(object):
 
@@ -98,7 +97,7 @@ class Beanstream(object):
     def create_payment_profile(self, card, billing_address=None):
         """ Creates a payment profile with the specified information.
         """
-        txn = transaction.CreatePaymentProfile(self, card)
+        txn = payment_profiles.CreatePaymentProfile(self, card)
         if billing_address:
             txn.add_billing_address(billing_address)
 
@@ -116,7 +115,7 @@ class Beanstream(object):
 
     def create_recurring_billing_account(self, amount, card, email,
             frequency_period, frequency_increment, billing_address=None):
-        txn = transaction.CreateRecurringBillingAccount(self, amount, card,
+        txn = recurring_billing.CreateRecurringBillingAccount(self, amount, card,
                 email, frequency_period, frequency_increment)
         if billing_address:
             txn.add_billing_address(billing_address)
