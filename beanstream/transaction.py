@@ -7,7 +7,8 @@ import urllib
 import urllib2
 import urlparse
 
-import errors
+from beanstream import errors
+from beanstream.response_codes import response_codes
 
 log = logging.getLogger('beanstream.transaction')
 
