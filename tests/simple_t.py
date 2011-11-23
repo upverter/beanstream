@@ -144,3 +144,12 @@ class BeanstreamTests(unittest.TestCase):
         purchase_resp = txn.commit()
         assert purchase_resp.approved()
 
+        txn = self.beanstream.modify_payment_profile(create_resp.customer_code())
+        txn.set_status('D')
+        modify_resp = txn.commit()
+        assert modify_resp.approved()
+
+        txn = self.beanstream.purchase_with_payment_profile(50, create_resp.customer_code())
+        purchase_resp2 = txn.commit()
+        assert not purchase_resp2.approved()
+
