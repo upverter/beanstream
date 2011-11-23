@@ -56,6 +56,9 @@ class Beanstream(object):
         if self.USERNAME_VALIDATION and (not self.username or not self.password):
             raise errors.ConfigurationException('username and password must be specified')
 
+        if self.hash_algorithm not in ('MD5', 'SHA1'):
+            raise errors.ConfigurationException('hash algorithm must be one of MD5 or SHA1')
+
     def purchase(self, amount, card, email, billing_address=None):
         """ Performs a one-off credit card purchase.
         """
