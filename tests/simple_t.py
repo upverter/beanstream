@@ -90,6 +90,7 @@ class BeanstreamTests(unittest.TestCase):
             visa['cvd'])
 
         txn = self.beanstream.purchase(50, card, self.billing_address)
+        txn.set_comments('%s:test_successful_cc_purchase' % __name__)
         resp = txn.commit()
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
@@ -104,6 +105,7 @@ class BeanstreamTests(unittest.TestCase):
             '000')
 
         txn = self.beanstream.purchase(50, card, self.billing_address)
+        txn.set_comments('%s:test_failed_cvd' % __name__)
         resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Mismatch'
@@ -119,6 +121,7 @@ class BeanstreamTests(unittest.TestCase):
             visa_limit['cvd'])
 
         txn = self.beanstream.purchase(250, card, self.billing_address)
+        txn.set_comments('%s:test_over_limit_cc_purchase' % __name__)
         resp = txn.commit()
         assert not resp.approved()
         assert resp.cvd_status() == 'CVD Match'
@@ -133,6 +136,7 @@ class BeanstreamTests(unittest.TestCase):
             visa['cvd'])
 
         txn = self.beanstream.create_recurring_billing_account(50, card, 'w', 2, billing_address=self.billing_address)
+        txn.set_comments('%s:test_create_recurring_billing:create_recurring_billing' % __name__)
         resp = txn.commit()
         assert resp.approved()
         assert resp.cvd_status() == 'CVD Match'
@@ -141,6 +145,7 @@ class BeanstreamTests(unittest.TestCase):
         account_id = resp.account_id()
 
         txn = self.beanstream.modify_recurring_billing_account(account_id)
+        txn.set_comments('%s:test_create_recurring_billing:modify_recurring_billing' % __name__)
         txn.set_billing_state('C')
         resp = txn.commit()
         assert resp.approved()
@@ -161,6 +166,7 @@ class BeanstreamTests(unittest.TestCase):
         customer_code = resp.customer_code()
 
         txn = self.beanstream.purchase_with_payment_profile(50, customer_code)
+        txn.set_comments('%s:test_payment_profiles:purchase_with_payment_profile' % __name__)
         resp = txn.commit()
         assert resp.approved()
 
@@ -170,6 +176,7 @@ class BeanstreamTests(unittest.TestCase):
         assert resp.approved()
 
         txn = self.beanstream.purchase_with_payment_profile(50, customer_code)
+        txn.set_comments('%s:test_payment_profiles:purchase_with_payment_profile' % __name__)
         resp = txn.commit()
         assert not resp.approved()
 
@@ -189,6 +196,7 @@ class BeanstreamTests(unittest.TestCase):
         customer_code = resp.customer_code()
 
         txn = self.beanstream.create_recurring_billing_account_from_payment_profile(25, customer_code, 'w', 4)
+        txn.set_comments('%s:test_payment_profile_from_recurring_billing:create_recurring_billing_account_from_payment_profile' % __name__)
         resp = txn.commit()
         assert resp.approved()
         assert resp.account_id() is not None
