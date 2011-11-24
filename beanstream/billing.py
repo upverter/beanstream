@@ -65,9 +65,9 @@ class Address:
             raise errors.ValidationException('Email must be specified in address')
         self.email = email
 
-        if not phone:
-            raise errors.ValidationException('Phone must be specified in address')
-        self.phone = str(phone)
+        self.phone = None
+        if phone:
+            self.phone = str(phone)
 
         if not address1:
             raise errors.ValidationException('Address1 must be specified in address')

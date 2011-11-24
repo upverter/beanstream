@@ -35,7 +35,7 @@ class Beanstream(object):
         self.hashcode = None
         self.payment_profile_passcode = None
 
-    def configure(self, merchant_id, **params):
+    def configure(self, merchant_id, login_user, login_password, **params):
         """ Configure the gateway.
 
         Keyword arguments:
@@ -45,6 +45,8 @@ class Beanstream(object):
             password: required if username validation is enabled.
         """
         self.merchant_id = merchant_id
+        self.login_user = login_user
+        self.login_password = login_password
         self.hashcode = params.get('hashcode', None)
         self.hash_algorithm = params.get('hash_algorithm', None)
         self.username = params.get('username', None)
@@ -109,7 +111,7 @@ class Beanstream(object):
         txn = process_transaction.Adjustment(self, process_transaction.Adjustment.PREAUTH_COMPLETION, transaction_id, amount)
         return txn
 
-    def cancel_preauth(self, transaction_id): 
+    def cancel_preauth(self, transaction_id):
         """ Returns an Adjustment object configured for cancelling the
         preauthorized transaction.
         """
@@ -129,6 +131,12 @@ class Beanstream(object):
         """ Returns a ModifyPaymentProfile object with the specified options.
         """
         txn = payment_profiles.ModifyPaymentProfile(self, customer_code)
+        return txn
+
+    def get_payment_profile(self, customer_code):
+        """ Returns a GetPaymentProfile object with the specified options.
+        """
+        txn = payment_profiles.GetPaymentProfile(self, customer_code)
         return txn
 
     def purchase_with_payment_profile(self, amount, customer_code):

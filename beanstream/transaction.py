@@ -19,6 +19,7 @@ class Transaction(object):
         'process_transaction'   : 'https://www.beanstream.com/scripts/process_transaction.asp',
         'recurring_billing'     : 'https://www.beanstream.com/scripts/recurring_billing.asp',
         'payment_profile'       : 'https://www.beanstream.com/scripts/payment_profile.asp',
+        'report'                : 'https://www.beanstream.com/scripts/report.aspx'
     }
 
     TRN_TYPES = {
@@ -134,4 +135,13 @@ class Response(object):
     def transaction_id(self):
         ''' Beanstream transaction identifier '''
         return self.resp.get('trnId', [None])[0]
+
+    def refs(self):
+        return [
+            self.resp.get('ref1', None),
+            self.resp.get('ref2', None),
+            self.resp.get('ref3', None),
+            self.resp.get('ref4', None),
+            self.resp.get('ref5', None),
+        ]
 

@@ -50,14 +50,5 @@ class RecurringBillingNotification(transaction.Response):
         return self.resp.get('periodFrom', None)
 
     def period_to(self):
-        return self.get('periodTo', None)
-
-    def refs(self):
-        return [
-            self.get('ref1', None),
-            self.get('ref2', None),
-            self.get('ref3', None),
-            self.get('ref4', None),
-            self.get('ref5', None),
-        ]
+        return self.resp.get('periodTo', None)
 
