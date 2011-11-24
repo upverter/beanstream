@@ -1,4 +1,4 @@
-from beanstream import errors, payment_profiles, process_transaction, recurring_billing
+from beanstream import errors, payment_profiles, process_transaction, recurring_billing, reports
 
 class Beanstream(object):
 
@@ -35,7 +35,7 @@ class Beanstream(object):
         self.hashcode = None
         self.payment_profile_passcode = None
 
-    def configure(self, merchant_id, login_user, login_password, **params):
+    def configure(self, merchant_id, login_company, login_user, login_password, **params):
         """ Configure the gateway.
 
         Keyword arguments:
@@ -45,6 +45,7 @@ class Beanstream(object):
             password: required if username validation is enabled.
         """
         self.merchant_id = merchant_id
+        self.login_company = login_company
         self.login_user = login_user
         self.login_password = login_password
         self.hashcode = params.get('hashcode', None)
@@ -184,5 +185,19 @@ class Beanstream(object):
         options.
         """
         txn = recurring_billing.ModifyRecurringBillingAccount(self, account_id)
+        return txn
+
+
+    def get_transaction_report(self):
+        txn = reports.TransactionReport(self)
+        return txn
+
+    def get_credit_card_lookup_report(self, card_number=None, txn_id=None):
+        txn = reports.CreditCardLookupReport(self)
+        if card_number:
+            txn.set_credit_card_number(card_number)
+        if txn_id:
+            txn.set_transaction_id(txn_id)
+
         return txn
 

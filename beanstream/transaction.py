@@ -19,7 +19,8 @@ class Transaction(object):
         'process_transaction'   : 'https://www.beanstream.com/scripts/process_transaction.asp',
         'recurring_billing'     : 'https://www.beanstream.com/scripts/recurring_billing.asp',
         'payment_profile'       : 'https://www.beanstream.com/scripts/payment_profile.asp',
-        'report'                : 'https://www.beanstream.com/scripts/report.aspx'
+        'report_download'       : 'https://www.beanstream.com/scripts/report_download.asp',
+        'report'                : 'https://www.beanstream.com/scripts/report.aspx',
     }
 
     TRN_TYPES = {
