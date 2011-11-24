@@ -12,6 +12,9 @@ class BeanstreamTests(unittest.TestCase):
         config = ConfigParser.SafeConfigParser()
         config.read('beanstream.cfg')
         merchant_id = config.get('beanstream', 'merchant_id')
+        company = config.get('beanstream', 'company')
+        username = config.get('beanstream', 'username')
+        password = config.get('beanstream', 'password')
 
         hashcode = None
         if config.has_option('beanstream', 'hashcode'):
@@ -39,6 +42,9 @@ class BeanstreamTests(unittest.TestCase):
                 require_cvd=require_cvd)
         self.beanstream.configure(
                 merchant_id,
+                company,
+                username,
+                password,
                 hashcode=hashcode,
                 hash_algorithm=hash_algorithm,
                 payment_profile_passcode=payment_profile_passcode,
