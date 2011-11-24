@@ -70,6 +70,9 @@ class PurchaseResponse(transaction.Response):
         else:
             return None
 
+    def transaction_id(self):
+        return self.resp.get('trnId', [None])[0]
+
     def get_cardholder_message(self):
         if 'messageId' in self.resp:
             return response_codes[self.resp['messageId'][0]]['cardholder_message']
