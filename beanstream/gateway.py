@@ -189,10 +189,22 @@ class Beanstream(object):
 
 
     def get_transaction_report(self):
+        """ Returns a TransactionReport object.
+        """
         txn = reports.TransactionReport(self)
         return txn
 
+    def get_transaction_set_report(self, transaction_ids):
+        """ Returns a TransactionSetReport object for the specified set of
+        transaction IDs.
+        """
+        txn = reports.TransactionSetReport(self, transaction_ids)
+
+        return txn
+
     def get_credit_card_lookup_report(self, card_number=None, txn_id=None):
+        """ Returns a CreditCardLookupReport object with the specified options.
+        """
         txn = reports.CreditCardLookupReport(self)
         if card_number:
             txn.set_credit_card_number(card_number)

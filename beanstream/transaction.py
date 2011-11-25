@@ -46,6 +46,7 @@ class Transaction(object):
 
         self._generate_order_number()
         self.params['trnOrderNumber'] = self.order_number
+        self.response_params = []
 
     def validate(self):
         pass
@@ -83,7 +84,7 @@ class Transaction(object):
         log.debug('Beanstream response: %s', body)
         log.debug(response)
 
-        return self.response_class(response)
+        return self.response_class(response, *self.response_params)
 
     def parse_raw_response(self, body):
         return urlparse.parse_qs(body)

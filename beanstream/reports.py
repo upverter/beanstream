@@ -1,7 +1,7 @@
 import logging
 import re
 
-from beanstream import errors, transaction
+from beanstream import billing, errors, transaction
 
 log = logging.getLogger('beanstream.reports')
 
@@ -37,7 +37,7 @@ class Report(transaction.Transaction):
             if m:
                 report_item = {}
                 for idx, field in enumerate(fields):
-                    if m.groups()[idx] == '\x00':
+                    if not m.groups()[idx] or m.groups()[idx] == '\x00':
                         report_item[field] = None
                     else:
                         report_item[field] = m.groups()[idx]
@@ -120,20 +120,83 @@ class TransactionReport(Report):
             self.params['rptTransTypes'] = '2'
 
 
-class TransactionReportResponse(ReportResponse):
+class TransactionReportResponse(object):
 
     @classmethod
     def _fields(cls):
-        return ['merchant_id', 'merchant_name', 'trn_id', 'trn_datetime',
-                'trn_card_owner', 'trn_ip', 'trn_type', 'trn_amount',
-                'trn_original_amount', 'trn_returns', 'trn_order_number',
-                'trn_batch_number', 'trn_auth_code', 'trn_card_type',
-                'trn_adjustment_to', 'trn_response', 'message_id', 'b_name',
-                'b_email', 'b_phone', 'b_address1', 'b_address2', 'b_city',
-                'b_province', 'b_postal', 'b_country', 's_name', 's_email',
-                's_phone', 's_address1', 's_address2', 's_city', 's_province',
-                's_postal', 's_country', 'eci', 'eft_rejected', 'eft_returned',
-                'avs_response', 'cvd_response', 'trn_currency']
+        return ['merchant_id', 'merchant_name', 'transaction_id',
+                'transaction_datetime', 'transaction_card_owner',
+                'transaction_ip', 'transaction_type', 'transaction_amount',
+                'transaction_original_amount', 'transaction_returns',
+                'transaction_order_number', 'transaction_batch_number',
+                'transaction_auth_code', 'transaction_card_type',
+                'transaction_adjustment_to', 'transaction_response',
+                'message_id', 'billing_name', 'billing_email', 'billing_phone',
+                'billing_address1', 'billing_address2', 'billing_city',
+                'billing_province', 'billing_postal', 'billing_country',
+                'shipping_name', 'shipping_email', 'shipping_phone',
+                'shipping_address1', 'shipping_address2', 'shipping_city',
+                'shipping_province', 'shipping_postal', 'shipping_country',
+                'eci', 'eft_rejected', 'eft_returned', 'avs_response',
+                'cvd_response', 'transaction_currency']
+
+    def __init__(self, report):
+        self.report = report
+
+        # do some additional post-processing.
+        for item in report:
+            # parse out the billing & shipping addresses.
+            self._process_address(item, 'billing')
+            self._process_address(item, 'shipping')
+
+    def _process_address(self, item, key_prefix):
+        fields = ['_name', '_email', '_phone', '_address1', '_address2',
+                '_city', '_province', '_postal', '_country']
+        if item['%s_name' % key_prefix] and item['%s_email' % key_prefix]:
+            address = billing.Address(
+                *[item[key_prefix + field] for field in fields])
+
+            item['%s_address' % key_prefix] = address
+
+        for field in fields:
+            del item[key_prefix + field]
+
+    def __iter__(self):
+        return self.report.__iter__()
+
+    def __len__(self):
+        return len(self.report)
+
+
+class TransactionSetReport(TransactionReport):
+    """ Specify a set of transaction IDs for which to fetch details. This is
+    performed by fetching the range of transaction IDs and then filtering out
+    anything that wasn't passed in. """
+
+    def __init__(self, beanstream, transaction_ids):
+        super(TransactionSetReport, self).__init__(beanstream)
+        self.response_class = TransactionSetReportResponse
+
+        # in case it was passed in as a generator, or as numbers, or both
+        transaction_ids = [str(txn_id) for txn_id in transaction_ids]
+        transaction_ids.sort()
+        self.response_params.append(transaction_ids)
+
+        self.set_transaction_range(transaction_ids[0], transaction_ids[-1])
+
+
+class TransactionSetReportResponse(TransactionReportResponse):
+
+    def __init__(self, response, transaction_ids):
+        super(TransactionSetReportResponse, self).__init__(response)
+
+        # filter out anything that wasn't in the original set.
+        report = []
+        for item in self.report:
+            if item['transaction_id'] in transaction_ids:
+                report.append(item)
+
+        self.report = report
 
 
 class CreditCardLookupReport(Report):
