@@ -54,8 +54,9 @@ class CreditCard:
 
 class Address:
 
-    def __init__(self, name, email, phone, address1, address2, city, province, postal_code, country):
-        """ Initialize an address struct and perform some basic validation.
+    def __init__(self, name, email, phone=None, address1=None, address2=None,
+            city=None, province=None, postal_code=None, country=None):
+        """ Initialize an address struct.
         """
         if not name:
             raise errors.ValidationException('Name must be specified in address')
@@ -69,41 +70,39 @@ class Address:
         if phone:
             self.phone = str(phone)
 
-        if not address1:
-            raise errors.ValidationException('Address1 must be specified in address')
         self.address1 = address1
         self.address2 = address2
-
-        if not city:
-            raise errors.ValidationException('City must be specified in address')
         self.city = city
-
-        if not province:
-            raise errors.ValidationException('Province/state must be specified in addresss')
-        if len(province) != 2:
-            raise errors.ValidationException('Malformed province/state code: %s' % province)
         self.province = province
-
-        if not postal_code:
-            raise errors.ValidationException('Postal code must be specified in address')
         self.postal_code = postal_code
-
-        if not country:
-            raise errors.ValidationException('Country code must be specified in address')
-        if len(country) != 2:
-            raise errors.ValidationException('Malformed country code: %s' % country)
         self.country = country
 
     def params(self, key_prefix):
-        return {
+        kvs = {
             '%sName' % key_prefix: self.name,
             '%sEmailAddress' % key_prefix: self.email,
-            '%sPhoneNumber' % key_prefix: self.phone,
-            '%sAddress1' % key_prefix: self.address1,
-            '%sAddress2' % key_prefix: self.address2,
-            '%sCity' % key_prefix: self.city,
-            '%sProvince' % key_prefix: self.province,
-            '%sPostalCode' % key_prefix: self.postal_code,
-            '%sCountry' % key_prefix: self.country,
         }
+
+        if self.phone:
+            kvs['%sPhoneNumber' % key_prefix] = self.phone
+
+        if self.address1:
+            kvs['%sAddress1' % key_prefix] = self.address1
+
+        if self.address2:
+            kvs['%sAddress2' % key_prefix] = self.address2
+
+        if self.city:
+            kvs['%sCity' % key_prefix] = self.city
+
+        if self.province:
+            kvs['%sProvince' % key_prefix] = self.province
+
+        if self.postal_code:
+            kvs['%sPostalCode' % key_prefix] = self.postal_code
+
+        if self.country:
+            kvs['%sCountry' % key_prefix] = self.country
+
+        return kvs
 
