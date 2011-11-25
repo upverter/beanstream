@@ -201,3 +201,21 @@ class BeanstreamTests(unittest.TestCase):
         assert resp.approved()
         assert resp.account_id() is not None
 
+    def test_simple_report(self):
+        txn = self.beanstream.get_transaction_report()
+        txn.set_date_range(date(2011, 8, 12), date(2011, 8, 14))
+
+        resp = txn.commit()
+
+        assert len(resp) == 0
+
+    def test_transaction_set_report(self):
+        transaction_ids = [10000283, 10000301, 10000290]
+        txn = self.beanstream.get_transaction_set_report(transaction_ids)
+        resp = txn.commit()
+
+        assert len(resp) == 3
+
+        for item in resp:
+            assert int(item['transaction_id']) in transaction_ids
+
