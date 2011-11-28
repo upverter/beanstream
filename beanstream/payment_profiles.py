@@ -95,7 +95,7 @@ class PaymentProfileResponse(transaction.Response):
         return billing.Address(
             self.resp.get('ordName', [None])[0],
             self.resp.get('ordEmailAddress', [None])[0],
-            None, # no phone number, apparently
+            self.resp.get('ordPhoneNumber', [None])[0],
             self.resp.get('ordAddress1', [None])[0],
             self.resp.get('ordAddress2', [None])[0],
             self.resp.get('ordCity', [None])[0],
