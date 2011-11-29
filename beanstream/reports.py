@@ -5,6 +5,15 @@ from beanstream import billing, errors, transaction
 
 log = logging.getLogger('beanstream.reports')
 
+TRANSACTION_TYPES = {
+        'P' : 'purchase',
+        'PA' : 'pre-authorization',
+        'PAC' : 'pre-authorization completion',
+        'R' : 'return',
+        'VP' : 'void purchase',
+        'VR' : 'void return',
+}
+
 
 class Report(transaction.Transaction):
 
@@ -149,6 +158,8 @@ class TransactionReportResponse(object):
             self._process_address(item, 'billing')
             self._process_address(item, 'shipping')
 
+            self._process_transaction_type(item)
+
     def _process_address(self, item, key_prefix):
         fields = ['_name', '_email', '_phone', '_address1', '_address2',
                 '_city', '_province', '_postal', '_country']
@@ -160,6 +171,9 @@ class TransactionReportResponse(object):
 
         for field in fields:
             del item[key_prefix + field]
+
+    def _process_transaction_type(self, item):
+        item['transaction_type'] = TRANSACTION_TYPES[item['transaction_type']]
 
     def __iter__(self):
         return self.report.__iter__()
