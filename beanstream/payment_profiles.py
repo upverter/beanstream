@@ -127,6 +127,15 @@ class PaymentProfileResponse(transaction.Response):
     def card_number(self):
         return self.resp.get('trnCardNumber', [None])[0]
 
-    def expiry(self):
-        return self.resp.get('trnCardExpiry', [None])[0]
+    def expiry_month(self):
+        if 'trnCardExpiry' in self.resp:
+            return self.resp['trnCardExpiry'][:-2]
+        else:
+            return None
+
+    def expiry_year(self):
+        if 'trnCardExpiry' in self.resp:
+            return self.resp['trnCardExpiry'][-2:]
+        else:
+            return None
 
