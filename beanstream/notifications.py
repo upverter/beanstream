@@ -1,4 +1,4 @@
-from beanstream import transaction
+from beanstream import transaction, utilities
 from beanstream.response_codes import response_codes
 
 
@@ -53,8 +53,14 @@ class RecurringBillingNotification(transaction.Response):
         return self.resp.get('billingIncrement', [None])[0]
 
     def period_from(self):
-        return self.resp.get('periodFrom', [None])[0]
+        if 'periodFrom' in self.resp:
+            return utilities.process_date(self.resp['periodFrom'][0])
+        else:
+            return None
 
     def period_to(self):
-        return self.resp.get('periodTo', [None])[0]
+        if 'periodTo' in self.resp:
+            return utilities.process_date(self.resp['periodTo'][0])
+        else:
+            return None
 
