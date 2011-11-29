@@ -6,6 +6,19 @@ from beanstream.response_codes import response_codes
 log = logging.getLogger('beanstream.payment_profiles')
 
 
+STATUS_DESCRIPTORS = {
+        'active' : 'A',
+        'closed' : 'C',
+        'on hold' : 'O'
+}
+
+STATUS_CODES = {
+        'A' : 'active',
+        'C' : 'closed',
+        'O' : 'on hold'
+}
+
+
 class PaymentProfileTransaction(transaction.Transaction):
 
     def __init__(self, beanstream):
@@ -37,11 +50,12 @@ class PaymentProfileTransaction(transaction.Transaction):
         self.params['statusIdentity'] = status_id
 
     def set_status(self, status):
-        status = status.upper()
-        if status not in 'ACD':
+        status = status.lower()
+
+        if status not in STATUS_DESCRIPTORS:
             raise errors.ValidationException('invalid status option specified: %s' % status)
 
-        self.params['status'] = status
+        self.params['status'] = STATUS_DESCRIPTORS[status]
 
 
 class CreatePaymentProfile(PaymentProfileTransaction):
@@ -89,7 +103,10 @@ class PaymentProfileResponse(transaction.Response):
         return self.resp.get('responseMessage', ['0'])[0] == '1'
 
     def status(self):
-        return self.resp.get('status', [None])[0]
+        if 'status' in self.resp:
+            return STATUS_CODES[self.resp['status']]
+        else:
+            return None
 
     def billing_address(self):
         return billing.Address(
