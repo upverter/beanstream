@@ -28,11 +28,11 @@ class RecurringBillingNotification(transaction.Response):
     def auth_code(self):
         return self.resp.get('authCode', None)
 
-    def account_name(self):
+    def name(self):
         return self.resp.get('accountName', None)
 
     def email(self):
-        return self.resp.get('email', None)
+        return self.resp.get('emailAddress', None)
 
     def billing_amount(self):
         return self.resp.get('billingAmount', None)
