@@ -128,6 +128,12 @@ class TransactionReport(Report):
         elif direct_payment and not credit_card:
             self.params['rptTransTypes'] = '2'
 
+    def set_include_refs(self, include_refs):
+        if include_refs:
+            self.params['rptRef'] = 1
+        elif 'rptRef' in self.params:
+            del self.params['rptRef']
+
 
 class TransactionReportResponse(object):
 
