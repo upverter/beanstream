@@ -44,7 +44,10 @@ class RecurringBillingNotification(transaction.Response):
         return self.resp.get('billingAmount', [None])[0]
 
     def billing_date(self):
-        return self.resp.get('billingDate', [None])[0]
+        if 'billingDate' in self.resp:
+            return utilities.process_date(self.resp['billingDate'][0])
+        else:
+            return None
 
     def billing_period(self):
         return self.resp.get('billingPeriod', [None])[0]
