@@ -1,6 +1,8 @@
+from datetime import datetime
 import logging
 
 from beanstream import errors, transaction
+from beanstream.response_codes import response_codes
 
 log = logging.getLogger('beanstream.process_transaction')
 
@@ -90,8 +92,11 @@ class PurchaseResponse(transaction.Response):
         return self.resp.get('trnAmount', [None])[0]
 
     def transaction_datetime(self):
-        ''' The date and time that the transaction was processed. '''
-        return self.resp.get('trnDate', [None])[0]
+        ''' The date and time that the transaction was processed, as a datetime object. '''
+        if 'trnDate' in self.resp:
+            return datetime.strptime(self.resp['trnDate'][0], '%m/%d/%Y %I:%M:%S %p')
+        else:
+            return None
 
     def approved(self):
         ''' Boolean if the transaction was approved or not '''
