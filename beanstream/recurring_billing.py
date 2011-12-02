@@ -6,6 +6,19 @@ from beanstream import errors, process_transaction, transaction
 log = logging.getLogger('beanstream.recurring_billing')
 
 
+STATUS_DESCRIPTORS = {
+        'active' : 'A',
+        'closed' : 'C',
+        'on hold' : 'O'
+}
+
+STATUS_CODES = {
+        'A' : 'active',
+        'C' : 'closed',
+        'O' : 'on hold'
+}
+
+
 class CreateRecurringBillingAccount(process_transaction.Purchase):
     """ Creating a recurring billing account is essentially doing a purchase
     transaction with some options specifying recurring billing.
@@ -111,11 +124,11 @@ class ModifyRecurringBillingAccount(transaction.Transaction):
         self.params['Amount'] = self._process_amount(amount)
 
     def set_billing_state(self, billing_state):
-        billing_state = billing_state.upper()
-        if billing_state not in 'ACO':
-            raise errors.ValidationException('invalid billing state specified: %s (must be one of ACO)' % billing_state)
+        billing_state = billing_state.lower()
+        if billing_state not in STATUS_DESCRIPTORS:
+            raise errors.ValidationException('invalid billing state option specified: %s' % billing_state)
 
-        self.params['rbBillingState'] = billing_state
+        self.params['rbBillingState'] = STATUS_DESCRIPTORS[billing_state]
 
     def set_comments(self, comments):
         self.params['trnComments'] = comments
