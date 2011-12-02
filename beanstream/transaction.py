@@ -116,7 +116,7 @@ class Transaction(object):
 
         for ref_idx, ref in enumerate(refs, start=1):
             if ref:
-                self['ref%s' % ref_idx] = ref
+                self.params['ref%s' % ref_idx] = ref
 
 
 class Response(object):
@@ -140,10 +140,10 @@ class Response(object):
 
     def refs(self):
         return [
-            self.resp.get('ref1', None),
-            self.resp.get('ref2', None),
-            self.resp.get('ref3', None),
-            self.resp.get('ref4', None),
-            self.resp.get('ref5', None),
+            self.resp.get('ref1', [None])[0],
+            self.resp.get('ref2', [None])[0],
+            self.resp.get('ref3', [None])[0],
+            self.resp.get('ref4', [None])[0],
+            self.resp.get('ref5', [None])[0],
         ]
 

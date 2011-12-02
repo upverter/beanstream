@@ -100,11 +100,11 @@ class PaymentProfileResponse(transaction.Response):
         return self.resp.get('responseCode', ['0'])[0] == '1'
 
     def get_message(self):
-        return self.resp.get('responseMessage', ['0'])[0] == '1'
+        return self.resp.get('responseMessage', ['0'])[0]
 
     def status(self):
         if 'status' in self.resp:
-            return STATUS_CODES[self.resp['status']]
+            return STATUS_CODES[self.resp['status'][0]]
         else:
             return None
 
@@ -129,13 +129,13 @@ class PaymentProfileResponse(transaction.Response):
 
     def expiry_month(self):
         if 'trnCardExpiry' in self.resp:
-            return self.resp['trnCardExpiry'][:-2]
+            return self.resp['trnCardExpiry'][0][:-2]
         else:
             return None
 
     def expiry_year(self):
         if 'trnCardExpiry' in self.resp:
-            return self.resp['trnCardExpiry'][-2:]
+            return self.resp['trnCardExpiry'][0][-2:]
         else:
             return None
 
