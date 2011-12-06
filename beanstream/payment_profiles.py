@@ -124,6 +124,9 @@ class PaymentProfileResponse(transaction.Response):
     def bank_account_type(self):
         return self.resp.get('bankAccountType', [None])[0]
 
+    def card_owner(self):
+        return self.resp.get('trnCardOwner', [None])[0]
+
     def card_number(self):
         return self.resp.get('trnCardNumber', [None])[0]
 
