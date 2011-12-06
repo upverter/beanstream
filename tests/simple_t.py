@@ -146,7 +146,7 @@ class BeanstreamTests(unittest.TestCase):
 
         txn = self.beanstream.modify_recurring_billing_account(account_id)
         txn.set_comments('%s:test_create_recurring_billing:modify_recurring_billing' % __name__)
-        txn.set_billing_state('C')
+        txn.set_billing_state('closed')
         resp = txn.commit()
         assert resp.approved()
 
@@ -171,7 +171,7 @@ class BeanstreamTests(unittest.TestCase):
         assert resp.approved()
 
         txn = self.beanstream.modify_payment_profile(customer_code)
-        txn.set_status('D')
+        txn.set_status('disabled')
         resp = txn.commit()
         assert resp.approved()
 
