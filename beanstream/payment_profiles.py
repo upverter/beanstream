@@ -9,13 +9,13 @@ log = logging.getLogger('beanstream.payment_profiles')
 STATUS_DESCRIPTORS = {
         'active' : 'A',
         'closed' : 'C',
-        'on hold' : 'O'
+        'disabled' : 'D'
 }
 
 STATUS_CODES = {
         'A' : 'active',
         'C' : 'closed',
-        'O' : 'on hold'
+        'D' : 'disabled'
 }
 
 
