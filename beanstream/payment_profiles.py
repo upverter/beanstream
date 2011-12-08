@@ -90,6 +90,21 @@ class GetPaymentProfile(PaymentProfileTransaction):
 
 class PaymentProfileResponse(transaction.Response):
 
+    field_name_mapping = {
+        'ordName': 'name',
+        'ordAddress1': 'address line 1',
+        'ordAddress2': 'address line 2',
+        'ordCity': 'city',
+        'ordProvince': 'state/province',
+        'ordCountry': 'country',
+        'ordPostalCode': 'zip/postal code',
+        'ordEmailAddress': 'email address',
+        'trnCardNumber': 'credit card number',
+        'trnCardOwner': 'credit card owner',
+        'trnCardExpiry': 'credit card expiry',
+        'customerCode': 'customer code',
+    }
+
     def cvd_status(self):
         cvd_statuses = {'1': 'CVD Match',
                         '2': 'CVD Mismatch',
@@ -117,7 +132,8 @@ class PaymentProfileResponse(transaction.Response):
             error_messages = self.resp['errorMessage'][0].split('<br>')[:-1] # last one is always blank
             error_fields = self.resp['errorFields'][0].split(',')
 
-            return dict(zip(error_fields, error_messages))
+            human_error_fields = [self.field_name_mapping.get(field, 'unknown') for field in error_fields]
+            return {'fields': dict(zip(human_error_fields, error_messages))}
 
         if 'messageId' in self.resp:
             cardholder_message = self.get_cardholder_message()
