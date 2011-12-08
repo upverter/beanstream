@@ -151,10 +151,7 @@ class Beanstream(object):
         """ Returns a PreAuthorization object with the specified options.
         """
         txn = process_transaction.PreAuthorization(self, amount)
-        txn.set_card(card)
-        if billing_address:
-            txn.set_billing_address(billing_address)
-
+        txn.set_customer_code(customer_code)
         return txn
 
     def create_recurring_billing_account_from_payment_profile(self, amount,
