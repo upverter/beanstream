@@ -138,9 +138,6 @@ class PaymentProfileResponse(transaction.Response):
     def approved(self):
         return self.resp.get('responseCode', ['0'])[0] == '1' and self.resp.get('trnApproved', ['1'])[0] == '1'
 
-    def get_message(self):
-        return self.resp.get('responseMessage', ['0'])[0]
-
     def status(self):
         if 'status' in self.resp:
             return STATUS_CODES[self.resp['status'][0]]
