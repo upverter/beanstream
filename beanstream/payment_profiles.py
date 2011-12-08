@@ -57,6 +57,9 @@ class PaymentProfileTransaction(transaction.Transaction):
 
         self.params['status'] = STATUS_DESCRIPTORS[status]
 
+    def set_validation(self, validate):
+        self.params['cardValidation'] = '1' if validate else '0'
+
 
 class CreatePaymentProfile(PaymentProfileTransaction):
 
@@ -87,8 +90,44 @@ class GetPaymentProfile(PaymentProfileTransaction):
 
 class PaymentProfileResponse(transaction.Response):
 
+    def cvd_status(self):
+        cvd_statuses = {'1': 'CVD Match',
+                        '2': 'CVD Mismatch',
+                        '3': 'CVD Not Verified',
+                        '4': 'CVD Should have been present',
+                        '5': 'CVD Issuer unable to process request',
+                        '6': 'CVD Not Provided',
+                        }
+        if 'cvdId' in self.resp:
+            return cvd_statuses[self.resp['cvdId'][0]]
+        else:
+            return None
+
     def get_message(self):
         return self.resp.get('responseMessage', [None])[0]
+
+    def get_errors(self):
+        if self.approved():
+            return {}
+
+        if not 'responseCode' in self.resp:
+            return {'message': 'no response code'}
+
+        if self.resp['responseCode'][0] == '19':
+            error_messages = self.resp['errorMessage'][0].split('<br>')[:-1] # last one is always blank
+            error_fields = self.resp['errorFields'][0].split(',')
+
+            return dict(zip(error_fields, error_messages))
+
+        if 'messageId' in self.resp:
+            cardholder_message = self.get_cardholder_message()
+            return {'message': cardholder_message}
+
+        if 'responseMessage' in self.resp:
+            message = self.resp['responseMessage'][0]
+            return {'message': message}
+
+        return {}
 
     def customer_code(self):
         return self.resp.get('customerCode', [None])[0]
@@ -97,7 +136,7 @@ class PaymentProfileResponse(transaction.Response):
         return self.resp.get('trnOrderNumber', [None])[0]
 
     def approved(self):
-        return self.resp.get('responseCode', ['0'])[0] == '1'
+        return self.resp.get('responseCode', ['0'])[0] == '1' and self.resp.get('trnApproved', ['1'])[0] == '1'
 
     def get_message(self):
         return self.resp.get('responseMessage', ['0'])[0]
@@ -139,6 +178,18 @@ class PaymentProfileResponse(transaction.Response):
     def expiry_year(self):
         if 'trnCardExpiry' in self.resp:
             return self.resp['trnCardExpiry'][0][-2:]
+        else:
+            return None
+
+    def get_cardholder_message(self):
+        if 'messageId' in self.resp:
+            return response_codes[self.resp['messageId'][0]]['cardholder_message']
+        else:
+            return None
+
+    def get_merchant_message(self):
+        if 'messageId' in self.resp:
+            return response_codes[self.resp['messageId'][0]]['merchant_message']
         else:
             return None
 
