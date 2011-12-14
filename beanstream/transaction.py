@@ -48,6 +48,9 @@ class Transaction(object):
         self.params['trnOrderNumber'] = self.order_number
         self.response_params = []
 
+        # default to transaction processing
+        self.url = self.URLS['process_transaction']
+
     def validate(self):
         pass
 
@@ -59,11 +62,14 @@ class Transaction(object):
         data = urllib.urlencode(self.params)
         if self.beanstream.HASH_VALIDATION and self.url == self.URLS['process_transaction']:
             if self.beanstream.hash_algorithm == 'MD5':
-                hash = hashlib.md5()
+                hashobj = hashlib.md5()
             elif self.beanstream.hash_algorithm == 'SHA1':
-                hash = hashlib.sha1()
-            hash.update(data + self.beanstream.hashcode)
-            hash_value = hash.hexdigest()
+                hashobj = hashlib.sha1()
+            else:
+                log.error('Hash method %s is not MD5 or SHA1', self.beanstream.hash_algorithm)
+                raise errors.ConfigurationException('Hash method must be MD5 or SHA1')
+            hashobj.update(data + self.beanstream.hashcode)
+            hash_value = hashobj.hexdigest()
             data += '&hashValue=%s' % hash_value
 
         log.debug('Sending to %s: %s', self.url, data)
@@ -92,7 +98,7 @@ class Transaction(object):
     def _generate_order_number(self):
         """ Generate a random 30-digit alphanumeric string.
         """
-        self.order_number = ''.join((random.choice(string.ascii_lowercase + string.digits) for x in xrange(30)))
+        self.order_number = ''.join((random.choice(string.ascii_lowercase + string.digits) for _ in xrange(30)))
 
     def _process_amount(self, amount):
         decimal_amount = decimal.Decimal(amount)

@@ -2,11 +2,6 @@ from beanstream import errors, payment_profiles, process_transaction, recurring_
 
 class Beanstream(object):
 
-    HASH_VALIDATION = False
-    USERNAME_VALIDATION = False
-    REQUIRE_CVD = False
-    REQUIRE_BILLING_ADDRESS = False
-
     def __init__(self, **options):
         """ Initialize the gateway.
 

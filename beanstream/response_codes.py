@@ -1,6 +1,6 @@
 # Beanstream response codes taken from 'Response Codes and Messages' document
 # last updated 2011/11/22
-
+# pylint: disable=C0301
 response_codes = {
   '1': {'type': 'NDC', 'approved': True, 'cardholder_message': 'Approved', 'merchant_message': 'Approved'},
   '2': {'type': 'NDC', 'approved': True, 'cardholder_message': 'Debit approved', 'merchant_message': 'Debit approved'},
