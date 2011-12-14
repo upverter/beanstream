@@ -141,6 +141,8 @@ class PaymentProfileResponse(transaction.Response):
 
         if 'responseMessage' in self.resp:
             message = self.resp['responseMessage'][0]
+            if message == 'DECLINED':
+                message = 'Declined'
             return {'message': message}
 
         return {}
