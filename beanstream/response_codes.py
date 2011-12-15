@@ -767,3 +767,27 @@ response_codes = {
   '788': {'type': 'Beanstream', 'approved': False, 'cardholder_message': 'Duplicate Order Number - This order number has already been processed', 'merchant_message': 'Duplicate Order Number - This order number has already been processed'},
   '789': {'type': 'Beanstream', 'approved': False, 'cardholder_message': 'Card Number Mismatch', 'merchant_message': 'Card Number Mismatch'},
 }
+
+
+avs_response_codes = {
+  '0': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Address Verification not performed for this transaction.'},
+  '5': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Invalid AVS Response.'},
+  '9': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Address Verification Data contains edit error.'},
+  'A': {'result': '0', 'processed': '1', 'address': '1', 'postal': '0', 'message': 'Street address matches, Postal/ZIP does not match.'},
+  'B': {'result': '0', 'processed': '1', 'address': '1', 'postal': '0', 'message': 'Street address matches, Postal/ZIP not verified.'},
+  'C': {'result': '0', 'processed': '1', 'address': '0', 'postal': '0', 'message': 'Street address and Postal/ZIP not verified.'},
+  'D': {'result': '1', 'processed': '1', 'address': '1', 'postal': '1', 'message': 'Street address and Postal/ZIP match.'},
+  'E': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Transaction ineligible.'},
+  'G': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Non AVS participant. Information not verified.'},
+  'I': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Address information not verified for international transaction.'},
+  'M': {'result': '1', 'processed': '1', 'address': '1', 'postal': '1', 'message': 'Street address and Postal/ZIP match.'},
+  'N': {'result': '0', 'processed': '1', 'address': '0', 'postal': '0', 'message': 'Street address and Postal/ZIP do not match.'},
+  'P': {'result': '0', 'processed': '1', 'address': '0', 'postal': '1', 'message': 'Postal/ZIP matches. Street address not verified.'},
+  'R': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'System unavailable or timeout.'},
+  'S': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'AVS not supported at this time.'},
+  'U': {'result': '0', 'processed': '0', 'address': '0', 'postal': '0', 'message': 'Address information is unavailable.'},
+  'W': {'result': '0', 'processed': '1', 'address': '0', 'postal': '1', 'message': 'Postal/ZIP matches, street address does not match.'},
+  'X': {'result': '1', 'processed': '1', 'address': '1', 'postal': '1', 'message': 'Street address and Postal/ZIP match.'},
+  'Y': {'result': '1', 'processed': '1', 'address': '1', 'postal': '1', 'message': 'Street address and Postal/ZIP match.'},
+  'Z': {'result': '0', 'processed': '1', 'address': '0', 'postal': '1', 'message': 'Postal/ZIP matches, street address does not match.'},
+}
