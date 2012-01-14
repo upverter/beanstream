@@ -68,6 +68,7 @@ The tests attempt to make requests against the Beanstream API using the test
 credit cards given for sandbox use.
 
 Example config file:
+
     # these should match your beanstream account settings
     hash_validation: true
     require_billing_address: true
